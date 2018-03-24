@@ -1,12 +1,13 @@
-package com.sqless.sqlessmobile;
+package com.sqless.sqlessmobile.ui;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.sqless.sqlessmobile.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,8 +26,10 @@ public class MainActivity extends AppCompatActivity {
         if (account == null) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivityForResult(intent, ACC_SIGN_IN);
+        } else {
+            //TODO user is already logged in
+//            updateUI(account);
         }
-//        updateUI(account);
     }
 
     @Override
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 GoogleSignInAccount account = data.getParcelableExtra("ACCOUNT");
                 Toast.makeText(this, "Bienvenido " + account.getEmail(), Toast.LENGTH_SHORT).show();
+            } else {
+                finish();
             }
         }
     }

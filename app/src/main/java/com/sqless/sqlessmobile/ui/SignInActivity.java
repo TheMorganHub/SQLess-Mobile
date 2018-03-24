@@ -1,36 +1,46 @@
-package com.sqless.sqlessmobile;
+package com.sqless.sqlessmobile.ui;
 
+import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.network.PostRequest;
 
-public class SignInActivity extends AppCompatActivity implements View.OnClickListener {
+public class SignInActivity extends Activity implements View.OnClickListener {
 
-    GoogleSignInClient mGoogleSignInClient;
+    private GoogleSignInClient mGoogleSignInClient;
     private static final int RC_SIGN_IN = 9001;
+    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
-
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+        signInButton.setOnClickListener(this);
+        getWindow().getDecorView().setBackgroundColor(Color.rgb(67, 90, 100));
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.google_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        queue = Volley.newRequestQueue(this);
     }
 
     public void signIn() {
@@ -53,9 +63,16 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     public void handleSignInResult(Task<GoogleSignInAccount> task) {
         try {
-            GoogleSignInAccount account = task.getResult(ApiException.class);
-            setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
-            finish();
+            final GoogleSignInAccount account = task.getResult(ApiException.class);
+
+            PostRequest request = new PostRequest(getString(R.string.auth_url), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
+                    finish();
+                }
+            }, "id_token=" + account.getIdToken());
+            queue.add(request);
         } catch (ApiException e) {
             Log.w("ERR", "status code: " + e.getStatusCode());
         }
