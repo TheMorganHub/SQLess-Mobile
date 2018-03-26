@@ -2,21 +2,91 @@ package com.sqless.sqlessmobile.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.db.HelperDB;
+import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.adapters.ListViewSubtituladoAdapter;
+import com.sqless.sqlessmobile.utils.SQLUtils;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final int ACC_SIGN_IN = 6969;
+    private AlertDialog activeDialog;
+    private List<SQLConnectionManager.ConnectionData> connectionDataList;
+    private ListViewSubtituladoAdapter<SQLConnectionManager.ConnectionData> adapter;
+    private HelperDB dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        dbHelper = new HelperDB(this);
+        connectionDataList = dbHelper.getConnections();
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> createConnectionDialog());
+        ListView lvConnections = findViewById(R.id.lv_connections);
+        adapter = new ListViewSubtituladoAdapter<>(this, connectionDataList);
+        lvConnections.setAdapter(adapter);
+    }
+
+    public void createConnectionDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        View viewInflated = LayoutInflater.from(MainActivity.this).inflate(R.layout.new_connection_dialog, findViewById(android.R.id.content), false);
+        viewInflated.findViewById(R.id.btn_test).setOnClickListener(view -> {
+            String host = ((EditText) viewInflated.findViewById(R.id.txt_con_host)).getText().toString();
+            String port = ((EditText) viewInflated.findViewById(R.id.txt_con_port)).getText().toString();
+            String username = ((EditText) viewInflated.findViewById(R.id.txt_con_username)).getText().toString();
+            String password = ((EditText) viewInflated.findViewById(R.id.txt_con_password)).getText().toString();
+            SQLConnectionManager.getInstance().testConnection(viewInflated, username, password, host, port, connectionData -> {
+                viewInflated.findViewById(R.id.btn_save).setEnabled(true);
+                Toast.makeText(this, "La prueba de conexión fue exitosa", Toast.LENGTH_SHORT).show();
+                SQLUtils.getDatabaseNames(names -> {
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names);
+                    ((Spinner) viewInflated.findViewById(R.id.spinner_dbs)).setAdapter(adapter);
+                    viewInflated.findViewById(R.id.spinner_dbs).setVisibility(View.VISIBLE);
+                });
+            }, errorCode -> {
+                viewInflated.findViewById(R.id.btn_save).setEnabled(false);
+                viewInflated.findViewById(R.id.spinner_dbs).setVisibility(View.INVISIBLE);
+                Toast.makeText(this, "La prueba de conexión falló", Toast.LENGTH_SHORT).show();
+            });
+        });
+        viewInflated.findViewById(R.id.btn_save).setOnClickListener(view -> {
+            SQLConnectionManager.ConnectionData lastSuccessful = SQLConnectionManager.getInstance().getLastSuccessful();
+            activeDialog.dismiss();
+            loadConnection(lastSuccessful);
+        });
+        dialogBuilder.setTitle("Nueva conexión");
+        dialogBuilder.setView(viewInflated);
+        activeDialog = dialogBuilder.show();
+    }
+
+    public void loadConnection(SQLConnectionManager.ConnectionData connectionData) {
+        long success = dbHelper.insertConnection(connectionData);
+        if (success != -1) {
+            connectionDataList.add(connectionData);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -28,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, ACC_SIGN_IN);
         } else {
             //TODO user is already logged in
-//            updateUI(account);
         }
     }
 

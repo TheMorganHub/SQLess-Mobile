@@ -2,4 +2,9 @@
     <string name="app_name">SQLess Mobile</string>
     <string name="google_client_id">836636734334-l52juju1iceodns5vvlihd8i6io30thd.apps.googleusercontent.com</string>
     <string name="auth_url">http://sqless.ddns.net:8080/ws/auth_google</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>
