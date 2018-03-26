@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.utils;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Spinner;
 
 public class UIUtils {
 
@@ -12,5 +13,21 @@ public class UIUtils {
      */
     public static void invokeOnUI(Runnable runnable) {
         new Handler(Looper.getMainLooper()).post(runnable);
+    }
+
+    public static void selectSpinnerItemByValue(Spinner spinner, String val) {
+        spinner.setSelection(getIndex(spinner, val));
+    }
+
+    private static int getIndex(Spinner spinner, String val) {
+        int index = 0;
+
+        for (int i = 0; i < spinner.getCount(); i++) {
+            if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(val)) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     }
 }

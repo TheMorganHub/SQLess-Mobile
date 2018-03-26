@@ -27,6 +27,7 @@ public class HelperDB extends SQLiteOpenHelper {
                 "\"id\"  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
                 "\"host\"  TEXT NOT NULL,\n" +
                 "\"port\"  TEXT NOT NULL,\n" +
+                "\"database\" TEXT NOT NULL,\n" +
                 "\"username\"  TEXT NOT NULL,\n" +
                 "\"password\"  TEXT NOT NULL\n" +
                 ");");
@@ -47,14 +48,17 @@ public class HelperDB extends SQLiteOpenHelper {
         Cursor c = db.rawQuery("SELECT * FROM connections", null);
         if (c.moveToFirst()) {
             do {
+                long id = c.getLong(c.getColumnIndex("id"));
                 String host = c.getString(c.getColumnIndex("host"));
                 String port = c.getString(c.getColumnIndex("port"));
+                String database = c.getString(c.getColumnIndex("database"));
                 String username = c.getString(c.getColumnIndex("username"));
                 String password = c.getString(c.getColumnIndex("password"));
-                connections.add(new SQLConnectionManager.ConnectionData(host, port, username, password));
+                connections.add(new SQLConnectionManager.ConnectionData(id, host, port, database, username, password));
             } while (c.moveToNext());
         }
         c.close();
+        logTable("connections");
         return connections;
     }
 
@@ -62,9 +66,24 @@ public class HelperDB extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("host", connectionData.host);
         values.put("port", connectionData.port);
+        values.put("database", connectionData.database);
         values.put("username", connectionData.username);
         values.put("password", connectionData.password);
         return getWritableDatabase().insert("connections", null, values);
+    }
+
+    public boolean updateConnection(SQLConnectionManager.ConnectionData connectionData) {
+        ContentValues values = new ContentValues();
+        values.put("host", connectionData.host);
+        values.put("port", connectionData.port);
+        values.put("database", connectionData.database);
+        values.put("username", connectionData.username);
+        values.put("password", connectionData.password);
+        return getWritableDatabase().update("connections", values, "id=?", new String[]{connectionData.getId() + ""}) > 0;
+    }
+
+    public boolean deleteConnection(SQLConnectionManager.ConnectionData connectionData) {
+        return getWritableDatabase().delete("connections", "id=?", new String[]{connectionData.getId() + ""}) > 0;
     }
 
     public String getErrLogs() {

@@ -11,53 +11,21 @@ public class SQLSelectQuery extends SQLQuery {
         super(sql);
     }
 
-    /**
-     * @param sql
-     * @param defaultErrorHandling
-     * @see SQLQuery#SQLQuery(String, boolean)
-     */
-    public SQLSelectQuery(String sql, boolean defaultErrorHandling) {
-        super(sql, defaultErrorHandling);
+    public SQLSelectQuery(String sql, boolean newThread) {
+        super(sql, newThread);
     }
 
     @Override
-    public void exec() {
-        Thread execThread = new Thread(() -> {
-            try {
-                statement = SQLConnectionManager.getInstance().getConnection().createStatement();
-                ResultSet rs = statement.executeQuery(getSql());
-                onSuccess(rs);
-            } catch (SQLException e) {
-                if (defaultErrorHandling) {
-                    onFaiureStandard(e.getMessage());
-                } else {
-                    onFailure(e.getMessage());
-                }
-            } finally {
-                closeQuery();
-            }
-        });
-        execThread.start();
-    }
-
-    @Override
-    public void execOnMaster() {
-        Thread execThread = new Thread(() -> {
-            try {
-                statement = SQLConnectionManager.getInstance().getMasterConnection().createStatement();
-                ResultSet rs = statement.executeQuery(getSql());
-                onSuccess(rs);
-            } catch (SQLException e) {
-                if (defaultErrorHandling) {
-                    onFaiureStandard(e.getMessage());
-                } else {
-                    onFailure(e.getMessage());
-                }
-            } finally {
-                closeQuery();
-            }
-        });
-        execThread.start();
+    protected void doExecute() {
+        try {
+            statement = SQLConnectionManager.getInstance().getConnection().createStatement();
+            ResultSet rs = statement.executeQuery(getSql());
+            onSuccess(rs);
+        } catch (SQLException e) {
+            onFailure(e.getMessage());
+        } finally {
+            closeQuery();
+        }
     }
 
     /**

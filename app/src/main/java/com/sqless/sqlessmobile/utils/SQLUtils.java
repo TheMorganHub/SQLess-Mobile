@@ -85,10 +85,10 @@ public class SQLUtils {
      * Devuelve los nombres de las bases de datos en el motor.
      *
      * @param callbackSuccess El callback que se ejecutará si la consulta es exitosa. Al callback
-     *                        se le pasará como parámetro una lista con los nombres de las bases de datos.
+     *                        se le pasará como parámetro una lista con los nombres de las bases de datos. Este mismo se ejecutará en el thread de UI.
      */
-    public static void getDatabaseNames(Callback<List<String>> callbackSuccess) {
-        SQLQuery nameQuery = new SQLSelectQuery("SHOW DATABASES") {
+    public static void getDatabaseNames(boolean newThread, Callback<List<String>> callbackSuccess) {
+        SQLQuery nameQuery = new SQLSelectQuery("SHOW DATABASES", newThread) {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<String> names = new ArrayList<>();
@@ -103,6 +103,6 @@ public class SQLUtils {
                 Log.e("Err", errMessage);
             }
         };
-        nameQuery.execOnMaster();
+        nameQuery.exec();
     }
 }

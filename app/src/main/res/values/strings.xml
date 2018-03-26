@@ -7,4 +7,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+    <string-array name="action_connections">
+        <item>Eliminar</item>
+        <item>Editar</item>
+    </string-array>
 </resources>

@@ -2,7 +2,6 @@ package com.sqless.sqlessmobile.db.queries;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -21,34 +20,22 @@ import java.sql.SQLException;
  */
 public class SQLUpdateQuery extends SQLQuery {
 
-    private Connection standaloneUpdateConnection;
-
     public SQLUpdateQuery(String sql) {
         super(sql);
     }
 
-    /**
-     * @param sql
-     * @param defaultErrorHandling
-     * @see SQLQuery#SQLQuery(String, boolean)
-     */
-    public SQLUpdateQuery(String sql, boolean defaultErrorHandling) {
-        super(sql, defaultErrorHandling);
+    public SQLUpdateQuery(String sql, boolean newThread) {
+        super(sql, newThread);
     }
 
     @Override
-    public void exec() {
+    protected void doExecute() {
         try {
-            standaloneUpdateConnection = SQLConnectionManager.getInstance().newQueryConnection();
-            statement = standaloneUpdateConnection.createStatement();
+            statement = SQLConnectionManager.getInstance().getConnection().createStatement();
             int affectedRows = statement.executeUpdate(getSql());
             onSuccess(affectedRows);
         } catch (SQLException ex) {
-            if (defaultErrorHandling) {
-                onFaiureStandard(ex.getMessage());
-            } else {
-                onFailure(ex.getMessage());
-            }
+            onFailure(ex.getMessage());
         } finally {
             closeQuery();
         }
@@ -63,16 +50,5 @@ public class SQLUpdateQuery extends SQLQuery {
      *                    updated by this query.
      */
     public void onSuccess(int updateCount) {
-    }
-
-    @Override
-    public void closeQuery() {
-        super.closeQuery();
-        try {
-            if (standaloneUpdateConnection != null) {
-                standaloneUpdateConnection.close();
-            }
-        } catch (SQLException e) {
-        }
     }
 }
