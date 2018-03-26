@@ -11,29 +11,16 @@ public abstract class SQLQuery {
 
     protected Statement statement;
     private String sql;
-    /**
-     * Si es falso, al haber un error en la query, el error no será mostrado en
-     * pantalla y se asume que el usuario dio una implementación propia de
-     * {@link #onFailure(String)}. Si es verdadero, SQLess mostrará un
-     * diálogo de error por default con texto sacado de la excepción. <br><br>
-     */
-    protected boolean defaultErrorHandling;
+    protected boolean newThread;
 
     public SQLQuery(String sql) {
         this.sql = SQLUtils.filterDelimiterKeyword(sql);
     }
 
-    /**
-     * Inicializa una nueva query. Usar este constructor si se desea que al
-     * fallar la query se muestre un mensaje por default sin tener que
-     * implementar {@link #onFailure(String)}
-     *
-     * @param sql
-     * @param defaultErrorHandling
-     */
-    public SQLQuery(String sql, boolean defaultErrorHandling) {
+    public SQLQuery(String sql, boolean newThread) {
         this(sql);
-        this.defaultErrorHandling = defaultErrorHandling;
+        this.newThread = newThread;
+
     }
 
     public String getSql() {
@@ -55,15 +42,24 @@ public abstract class SQLQuery {
     }
 
     /**
-     * Executes this query.
+     * Ejecuta esta query. Si el valor de {@link #newThread} es falso, la query se ejecutará en el
+     * mismo thread que ha creado este objeto. De lo contrario, se creará un nuevo thread para esa query.
+     *
+     * @see #doExecute()
      */
-    public abstract void exec();
+    public void exec() {
+        if (newThread) {
+            Thread execThread = new Thread(this::doExecute);
+            execThread.start();
+        } else {
+            doExecute();
+        }
+    }
 
     /**
-     * Ejecuta la query contra la conexión master.
+     * Contiene la lógica de ejecución de la query. El manejo de threads se hace en {@link #exec()}.
      */
-    public void execOnMaster() {
-    }
+    protected abstract void doExecute();
 
     /**
      * Closes this SQL query's {@link Statement} object.
