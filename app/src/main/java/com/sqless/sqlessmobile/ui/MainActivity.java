@@ -27,7 +27,7 @@ import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     public static final int ACC_SIGN_IN = 6969;
     private AlertDialog activeDialog;
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         lvConnections.setAdapter(adapter);
         lvConnections.setOnItemLongClickListener(this);
+        lvConnections.setOnItemClickListener(this);
     }
 
     public void createConnectionDialog(SQLConnectionManager.ConnectionData savedConnectionData) {
@@ -175,6 +176,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        SQLConnectionManager.ConnectionData selectedItem = adapter.getItem(i);
+        Intent intent = new Intent(this, DatabaseActionsActivity.class);
+        intent.putExtra("CONNECTION_DATA", selectedItem);
+        startActivity(intent);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ACC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
@@ -185,4 +194,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         }
     }
+
 }

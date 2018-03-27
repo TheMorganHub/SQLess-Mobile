@@ -12,6 +12,7 @@ import com.sqless.sqlessmobile.ui.adapters.Subtitulado;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -88,7 +89,7 @@ public class SQLConnectionManager {
         return INSTANCE;
     }
 
-    public static class ConnectionData implements Subtitulado {
+    public static class ConnectionData implements Subtitulado, Serializable {
 
         private long id;
         public String host;

@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.utils;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.Fragment;
 import android.widget.Spinner;
 
 public class UIUtils {
@@ -29,5 +30,9 @@ public class UIUtils {
             }
         }
         return index;
+    }
+
+    public static String getTagForFragment(Fragment fragment) {
+        return fragment.getClass().getName();
     }
 }
