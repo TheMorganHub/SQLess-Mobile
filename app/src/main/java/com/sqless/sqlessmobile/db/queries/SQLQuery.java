@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.db.queries;
 
 import android.util.Log;
 
+import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.sql.SQLException;
@@ -12,13 +13,15 @@ public abstract class SQLQuery {
     protected Statement statement;
     private String sql;
     protected boolean newThread;
+    protected SQLConnectionManager.ConnectionData connectionData;
 
-    public SQLQuery(String sql) {
+    public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql) {
         this.sql = SQLUtils.filterDelimiterKeyword(sql);
+        this.connectionData = conData;
     }
 
-    public SQLQuery(String sql, boolean newThread) {
-        this(sql);
+    public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql, boolean newThread) {
+        this(conData, sql);
         this.newThread = newThread;
 
     }
@@ -68,6 +71,7 @@ public abstract class SQLQuery {
         try {
             if (statement != null) {
                 statement.close();
+                connectionData.killConnectionIfActive();
             }
         } catch (SQLException e) {
         }

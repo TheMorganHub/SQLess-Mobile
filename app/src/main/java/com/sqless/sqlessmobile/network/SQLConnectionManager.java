@@ -20,14 +20,13 @@ import java.sql.SQLException;
 public class SQLConnectionManager {
 
     private static SQLConnectionManager INSTANCE;
-    private Connection connection;
     private ConnectionData lastSuccessful;
 
     private SQLConnectionManager() {
     }
 
     /**
-     * Tests a specified connection by attempting to connect to database
+     * Tests a specified activeConnection by attempting to connect to database
      * "master" in SQLServer using a temporary {@code Connection} object. If
      * successful, the {@code Connection} is then promptly closed.
      *
@@ -49,8 +48,8 @@ public class SQLConnectionManager {
         Thread conTestThread = new Thread(() -> {
             try (Connection testCon = DriverManager.getConnection("jdbc:drizzle://" + hostName + ":" + port + "/mysql?connectTimeout=3", username, password)) {
                 lastSuccessful = new ConnectionData(hostName, port, "mysql", username, password);
-                connection = testCon;
-                SQLUtils.getDatabaseNames(false, names -> {
+
+                SQLUtils.getDatabaseNames(lastSuccessful, false, names -> {
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, names);
                     ((Spinner) v.findViewById(R.id.spinner_dbs)).setAdapter(adapter);
                     v.findViewById(R.id.spinner_dbs).setVisibility(View.VISIBLE);
@@ -74,12 +73,13 @@ public class SQLConnectionManager {
         conTestThread.start();
     }
 
+
     public ConnectionData getLastSuccessful() {
         return lastSuccessful;
     }
 
-    public Connection getConnection() {
-        return connection;
+    public Connection getConnection(ConnectionData data) {
+        return data.makeConnection();
     }
 
     public static SQLConnectionManager getInstance() {
@@ -97,6 +97,7 @@ public class SQLConnectionManager {
         public String database;
         public String username;
         public String password;
+        private String tableName;
         private Connection connection;
 
         public ConnectionData(long id, String host, String port, String database, String username, String password) {
@@ -117,6 +118,14 @@ public class SQLConnectionManager {
             this.password = password;
         }
 
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public String getTableName() {
+            return tableName;
+        }
+
         public void setDatabase(String database) {
             this.database = database;
         }
@@ -131,25 +140,28 @@ public class SQLConnectionManager {
 
         public Connection makeConnection() {
             try {
-                if (connection != null) {
-                    if (connection.isClosed()) {
-                        connection = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3", username, password);
-                    }
+                if (connection == null || connection.isClosed()) {
+                    connection = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3", username, password);
                 }
             } catch (SQLException ex) {
-                Log.e("ERR", "Could not create connection");
+                Log.e("ERR", "Could not create activeConnection");
             }
             return connection;
         }
 
-        public void closeConnection() {
-            try {
-                if (connection != null && !connection.isClosed()) {
-                    connection.close();
+        public void killConnectionIfActive() {
+            Thread t = new Thread(() -> {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                        connection = null;
+                        Log.i("SQLConnectionManager", "Killed active connection.");
+                    } catch (SQLException ex) {
+                        Log.e("ERR", "No se pudo matar la conexión");
+                    }
                 }
-            } catch (SQLException ex) {
-                Log.e("SQLConnectionManager", "No se pudo cerrar la conexión");
-            }
+            });
+            t.start();
         }
 
         public String getNombre() {

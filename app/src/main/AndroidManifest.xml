@@ -28,7 +28,8 @@
         <activity
             android:name=".ui.DatabaseActionsActivity"
             android:label="@string/title_activity_database_actions"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.TableDetailsActivity"></activity>
     </application>
 
 </manifest>

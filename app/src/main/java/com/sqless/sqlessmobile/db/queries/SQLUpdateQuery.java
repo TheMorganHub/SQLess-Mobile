@@ -20,18 +20,18 @@ import java.sql.SQLException;
  */
 public class SQLUpdateQuery extends SQLQuery {
 
-    public SQLUpdateQuery(String sql) {
-        super(sql);
+    public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql) {
+        super(connectionData, sql);
     }
 
-    public SQLUpdateQuery(String sql, boolean newThread) {
-        super(sql, newThread);
+    public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
+        super(connectionData, sql, newThread);
     }
 
     @Override
     protected void doExecute() {
         try {
-            statement = SQLConnectionManager.getInstance().getConnection().createStatement();
+            statement = SQLConnectionManager.getInstance().getConnection(connectionData).createStatement();
             int affectedRows = statement.executeUpdate(getSql());
             onSuccess(affectedRows);
         } catch (SQLException ex) {

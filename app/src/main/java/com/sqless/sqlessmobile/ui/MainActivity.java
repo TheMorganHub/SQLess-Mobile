@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private List<SQLConnectionManager.ConnectionData> connectionDataList;
     private ListViewSubtituladoAdapter<SQLConnectionManager.ConnectionData> adapter;
     private HelperDB dbHelper;
+    private SQLConnectionManager.ConnectionData activeConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +153,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             //TODO user is already logged in
         }
+        //Matamos cualquier conexión activa si es que el usuario vuelve a esta pantalla
+        if (activeConnection != null) {
+            activeConnection.killConnectionIfActive();
+        }
     }
 
     @Override
@@ -181,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Intent intent = new Intent(this, DatabaseActionsActivity.class);
         intent.putExtra("CONNECTION_DATA", selectedItem);
         startActivity(intent);
+        this.activeConnection = selectedItem;
     }
 
     @Override

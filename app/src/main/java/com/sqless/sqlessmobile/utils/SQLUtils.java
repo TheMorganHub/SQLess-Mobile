@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLSelectQuery;
+import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -87,8 +89,8 @@ public class SQLUtils {
      * @param callbackSuccess El callback que se ejecutará si la consulta es exitosa. Al callback
      *                        se le pasará como parámetro una lista con los nombres de las bases de datos. Este mismo se ejecutará en el thread de UI.
      */
-    public static void getDatabaseNames(boolean newThread, Callback<List<String>> callbackSuccess) {
-        SQLQuery nameQuery = new SQLSelectQuery("SHOW DATABASES", newThread) {
+    public static void getDatabaseNames(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<String>> callbackSuccess) {
+        SQLQuery nameQuery = new SQLSelectQuery(connectionData, "SHOW DATABASES", newThread) {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<String> names = new ArrayList<>();
@@ -104,5 +106,50 @@ public class SQLUtils {
             }
         };
         nameQuery.exec();
+    }
+
+    public static void getTableNames(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery tablesQuery = new SQLSelectQuery(connectionData, "SHOW TABLES", newThread) {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                List<String> tableNames = new ArrayList<>();
+                while (rs.next()) {
+                    tableNames.add(rs.getString(1));
+                }
+                UIUtils.invokeOnUI(() -> callbackSuccess.exec(tableNames));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUI(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        tablesQuery.exec();
+    }
+
+    public static void getColumns(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery columnsQuery = new SQLSelectQuery(connectionData,
+                "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = '" + connectionData.database
+                        + "' AND TABLE_NAME = '" + connectionData.getTableName() + "'", newThread) {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                List<SQLColumn> columns = new ArrayList<>();
+                while (rs.next()) {
+                    String colName = rs.getString("COLUMN_NAME");
+                    String dataType = rs.getString("DATA_TYPE");
+                    SQLColumn column = new SQLColumn(colName, dataType);
+                    column.setIsPK(rs.getString("COLUMN_KEY").equals("PRI"));
+                    column.setIsFK(rs.getString("COLUMN_KEY").equals("MUL"));
+                    columns.add(column);
+                }
+                UIUtils.invokeOnUI(() -> callbackSuccess.exec(columns));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUI(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        columnsQuery.exec();
     }
 }

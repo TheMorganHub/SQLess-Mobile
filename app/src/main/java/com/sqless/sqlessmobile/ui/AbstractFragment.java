@@ -13,13 +13,13 @@ import com.sqless.sqlessmobile.network.SQLConnectionManager;
 public abstract class AbstractFragment extends Fragment {
     protected FragmentInteractionListener mListener;
     protected SQLConnectionManager.ConnectionData connectionData;
-    private String title;
+    protected View fragmentView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(getLayoutResId(), container, false);
+        fragmentView = inflater.inflate(getLayoutResId(), container, false);
+        return fragmentView;
     }
 
     public static <T extends AbstractFragment> T newInstance(SQLConnectionManager.ConnectionData connectionData, Class<T> clazz) {
@@ -33,10 +33,6 @@ public abstract class AbstractFragment extends Fragment {
         args.putSerializable("CONNECTION_DATA", connectionData);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    protected void setTitle(String title) {
-        this.title = title;
     }
 
     /**
@@ -55,13 +51,27 @@ public abstract class AbstractFragment extends Fragment {
     protected abstract int getLayoutResId();
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        afterCreate();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
         if (getArguments() != null) {
             connectionData = (SQLConnectionManager.ConnectionData) getArguments().getSerializable("CONNECTION_DATA");
+            mListener.onInteraction(getTitle(), connectionData);
         }
     }
+
+    /**
+     * Este método se ejecuta luego de {@link #onActivityCreated(Bundle)} y cuando todos los argumentos
+     * pasados a este fragment ya están cargados.
+     */
+    public abstract void afterCreate();
 
     @Override
     public void onAttach(Context context) {
@@ -82,12 +92,6 @@ public abstract class AbstractFragment extends Fragment {
     }
 
     protected abstract void implementListeners(View containerView);
-
-    public void onButtonPressed() {
-        if (mListener != null) {
-            mListener.onInteraction(title, connectionData);
-        }
-    }
 
     @Override
     public void onDetach() {

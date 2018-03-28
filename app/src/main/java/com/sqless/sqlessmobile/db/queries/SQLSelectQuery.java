@@ -7,18 +7,18 @@ import java.sql.SQLException;
 
 public class SQLSelectQuery extends SQLQuery {
 
-    public SQLSelectQuery(String sql) {
-        super(sql);
+    public SQLSelectQuery(SQLConnectionManager.ConnectionData connData, String sql) {
+        super(connData, sql);
     }
 
-    public SQLSelectQuery(String sql, boolean newThread) {
-        super(sql, newThread);
+    public SQLSelectQuery(SQLConnectionManager.ConnectionData connData, String sql, boolean newThread) {
+        super(connData, sql, newThread);
     }
 
     @Override
     protected void doExecute() {
         try {
-            statement = SQLConnectionManager.getInstance().getConnection().createStatement();
+            statement = SQLConnectionManager.getInstance().getConnection(connectionData).createStatement();
             ResultSet rs = statement.executeQuery(getSql());
             onSuccess(rs);
         } catch (SQLException e) {
