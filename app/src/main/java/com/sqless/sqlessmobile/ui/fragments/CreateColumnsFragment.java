@@ -24,7 +24,6 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
 
     private List<SQLColumn> sqlColumns;
     private ListViewColumnDetailsAdapter adapter;
-    private AlertDialog activeDialog;
     EventBus bus = EventBus.getDefault();
 
 
@@ -82,6 +81,7 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
         dialogBuilder.setTitle("Nueva columna");
         activeDialog = dialogBuilder.show();
     }
+
 
     @Override
     public void onFabClicked() {

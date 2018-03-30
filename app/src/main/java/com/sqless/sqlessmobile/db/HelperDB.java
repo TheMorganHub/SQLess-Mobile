@@ -58,7 +58,6 @@ public class HelperDB extends SQLiteOpenHelper {
             } while (c.moveToNext());
         }
         c.close();
-        logTable("connections");
         return connections;
     }
 

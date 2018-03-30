@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ public abstract class AbstractFragment extends Fragment {
     protected FragmentInteractionListener mListener;
     protected SQLConnectionManager.ConnectionData connectionData;
     protected View fragmentView;
+    protected AlertDialog activeDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,6 +88,7 @@ public abstract class AbstractFragment extends Fragment {
         }
     }
 
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -101,5 +104,9 @@ public abstract class AbstractFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        if (activeDialog != null) {
+            activeDialog.dismiss();
+            activeDialog = null;
+        }
     }
 }

@@ -3,7 +3,9 @@ package com.sqless.sqlessmobile.sqlobjects;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.Iconable;
 
-public class SQLColumn implements Iconable {
+import java.io.Serializable;
+
+public class SQLColumn implements Iconable, Serializable {
 
     private String nombre;
     private String datatype;
