@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
 
 public abstract class AbstractFragment extends Fragment {
     protected FragmentInteractionListener mListener;
@@ -88,7 +89,10 @@ public abstract class AbstractFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        implementListeners(view);
+        implementListeners(view.getRootView());
+    }
+
+    public void onFabClicked() {
     }
 
     protected abstract void implementListeners(View containerView);

@@ -2,25 +2,31 @@ package com.sqless.sqlessmobile.db.queries;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SQLSelectQuery extends SQLQuery {
 
-    public SQLSelectQuery(SQLConnectionManager.ConnectionData connData, String sql) {
-        super(connData, sql);
+    public SQLSelectQuery(SQLConnectionManager.ConnectionData connectionData, String sql) {
+        super(connectionData, sql);
     }
 
-    public SQLSelectQuery(SQLConnectionManager.ConnectionData connData, String sql, boolean newThread) {
-        super(connData, sql, newThread);
+    public SQLSelectQuery(SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
+        super(connectionData, sql, newThread);
     }
 
     @Override
     protected void doExecute() {
         try {
-            statement = SQLConnectionManager.getInstance().getConnection(connectionData).createStatement();
-            ResultSet rs = statement.executeQuery(getSql());
-            onSuccess(rs);
+            Connection conFromData = SQLConnectionManager.getInstance().getConnection(connectionData);
+            if (conFromData != null) {
+                statement = conFromData.createStatement();
+                ResultSet rs = statement.executeQuery(getSql());
+                onSuccess(rs);
+            } else {
+                throw new SQLException("La conexión es nula");
+            }
         } catch (SQLException e) {
             onFailure(e.getMessage());
         } finally {

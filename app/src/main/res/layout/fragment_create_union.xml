@@ -3,19 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.ColumnsFragment">
+    tools:context=".ui.fragments.CreateUnionFragment">
 
-
-    <ProgressBar
-        android:id="@+id/column_progress_bar"
-        style="?android:attr/progressBarStyle"
+    <TextView
+        android:id="@+id/tv_create_table_no_fks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="invisible" />
+        android:text="No hay FKs" />
 
     <ListView
-        android:id="@+id/lv_columnas"
+        android:id="@+id/lv_unions"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </FrameLayout>

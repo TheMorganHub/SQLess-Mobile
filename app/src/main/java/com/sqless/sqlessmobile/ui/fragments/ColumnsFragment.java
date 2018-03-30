@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.fragments;
 
 import android.view.View;
 import android.widget.ListView;

@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
 
 /**
  * A simple {@link Fragment} subclass.

@@ -7,12 +7,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.fragments.AbstractFragment;
+import com.sqless.sqlessmobile.ui.fragments.ColumnsFragment;
+import com.sqless.sqlessmobile.ui.fragments.IndicesFragment;
 
-public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
+public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
     private Context mContext;
     private final Bundle fragmentBundle;
 
-    public SimpleFragmentPagerAdapter(Context context, FragmentManager fm, Bundle data) {
+    public FragmentPagerTableDetailsAdapter(Context context, FragmentManager fm, Bundle data) {
         super(fm);
         mContext = context;
         this.fragmentBundle = data;

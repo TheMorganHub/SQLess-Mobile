@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -16,6 +16,10 @@ import android.widget.TextView;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.fragments.AbstractFragment;
+import com.sqless.sqlessmobile.ui.fragments.TablesFragment;
+import com.sqless.sqlessmobile.ui.fragments.ViewsFragment;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
 public class DatabaseActionsActivity extends AppCompatActivity

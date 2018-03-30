@@ -1,14 +1,17 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.activities.CreateTableActivity;
+import com.sqless.sqlessmobile.ui.activities.TableDetailsActivity;
 import com.sqless.sqlessmobile.ui.adapters.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
@@ -26,6 +29,8 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     private List<String> tableNames;
     private ListViewImageAdapter<String> tablesAdapter;
+
+    private static final int TABLE_CREATION_RESULT = 341;
 
     public TablesFragment() {
     }
@@ -60,10 +65,24 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     @Override
     protected void implementListeners(View containerView) {
-        containerView.findViewById(R.id.fab_create_table).setOnClickListener(view1 -> {
-            Log.i("FAB", "Bwerk!");
-            //TODO implement listener
-        });
+        containerView.findViewById(R.id.fab_create_table).setOnClickListener(view1 -> actionCreateTable());
+    }
+
+    public void actionCreateTable() {
+        Intent intent = new Intent(getContext(), CreateTableActivity.class);
+        intent.putExtra("CONNECTION_DATA", connectionData);
+        startActivityForResult(intent, TABLE_CREATION_RESULT);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case TABLE_CREATION_RESULT:
+                if (resultCode == Activity.RESULT_OK) {
+                    //TODO el usuario creo una tabla y hay que refrescar el listview con tablas
+                }
+                break;
+        }
     }
 
     @Override

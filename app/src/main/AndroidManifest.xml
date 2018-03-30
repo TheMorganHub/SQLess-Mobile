@@ -13,11 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.SignInActivity"
+            android:name=".ui.activities.SignInActivity"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Black.NoTitleBar" />
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN" />
@@ -26,10 +26,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.DatabaseActionsActivity"
+            android:name=".ui.activities.DatabaseActionsActivity"
             android:label="@string/title_activity_database_actions"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ui.TableDetailsActivity"></activity>
+        <activity android:name=".ui.activities.TableDetailsActivity" />
+        <activity
+            android:name=".ui.activities.CreateTableActivity"
+            android:label="@string/title_activity_create_table" />
     </application>
 
 </manifest>

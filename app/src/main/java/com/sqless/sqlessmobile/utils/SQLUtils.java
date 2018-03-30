@@ -109,7 +109,7 @@ public class SQLUtils {
     }
 
     public static void getTableNames(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
-        SQLQuery tablesQuery = new SQLSelectQuery(connectionData, "SHOW TABLES", newThread) {
+        SQLQuery tablesQuery = new SQLSelectQuery(connectionData, "show full tables where Table_Type = 'BASE TABLE' OR Table_Type = 'SYSTEM VIEW'", newThread) {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<String> tableNames = new ArrayList<>();
@@ -139,9 +139,30 @@ public class SQLUtils {
                     String dataType = rs.getString("DATA_TYPE");
                     SQLColumn column = new SQLColumn(colName, dataType);
                     column.setIsPK(rs.getString("COLUMN_KEY").equals("PRI"));
-                    column.setIsFK(rs.getString("COLUMN_KEY").equals("MUL"));
                     columns.add(column);
                 }
+
+                SQLQuery fkQuery = new SQLSelectQuery(connectionData, "SELECT DISTINCT COLUMN_NAME\n" +
+                        "FROM information_schema.TABLE_CONSTRAINTS i\n" +
+                        "LEFT JOIN information_schema.KEY_COLUMN_USAGE k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME\n" +
+                        "LEFT JOIN information_schema.REFERENTIAL_CONSTRAINTS r ON r.CONSTRAINT_NAME = k.CONSTRAINT_NAME\n" +
+                        "WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'\n" +
+                        "AND i.TABLE_SCHEMA = '" + connectionData.database + "'\n" +
+                        "AND i.TABLE_NAME = '" + connectionData.getTableName() + "';") {
+                    @Override
+                    public void onSuccess(ResultSet rs) throws SQLException {
+                        while (rs.next()) {
+                            String colFkName = rs.getString(1);
+                            for (SQLColumn column : columns) {
+                                if (column.getNombre().equals(colFkName)) {
+                                    column.setIsFK(true);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                };
+                fkQuery.exec();
                 UIUtils.invokeOnUI(() -> callbackSuccess.exec(columns));
             }
 

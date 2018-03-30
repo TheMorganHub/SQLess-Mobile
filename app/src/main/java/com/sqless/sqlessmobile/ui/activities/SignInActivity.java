@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.activities;
 
 import android.app.Activity;
 import android.content.Intent;

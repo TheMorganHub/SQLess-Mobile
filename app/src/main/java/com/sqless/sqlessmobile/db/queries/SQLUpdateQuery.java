@@ -2,22 +2,9 @@ package com.sqless.sqlessmobile.db.queries;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * A class that represents a query that doesn't return ResultSets and performs
- * UPDATE/DELETE/INSERT operations on a table. In other words, DDL operations.
- * This class utilises a standalone connection from which to create the query
- * statement, this is due to potential errors that could arise if using SQLess'
- * main connection to the engine.
- * <br><br>
- * Note: queries of this class are executed on the same thread this object is
- * created. This is intentional. Exercise caution when running queries that
- * could take a long time, especially if called from within Swing's <i>Event
- * Dispatch Thread</i> as this could freeze the UI.
- *
- * @author Morgan
- */
 public class SQLUpdateQuery extends SQLQuery {
 
     public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql) {
@@ -31,9 +18,14 @@ public class SQLUpdateQuery extends SQLQuery {
     @Override
     protected void doExecute() {
         try {
-            statement = SQLConnectionManager.getInstance().getConnection(connectionData).createStatement();
-            int affectedRows = statement.executeUpdate(getSql());
-            onSuccess(affectedRows);
+            Connection conFromData = SQLConnectionManager.getInstance().getConnection(connectionData);
+            if (conFromData != null) {
+                statement = conFromData.createStatement();
+                int affectedRows = statement.executeUpdate(getSql());
+                onSuccess(affectedRows);
+            } else {
+                throw new SQLException("La conexión es nula");
+            }
         } catch (SQLException ex) {
             onFailure(ex.getMessage());
         } finally {

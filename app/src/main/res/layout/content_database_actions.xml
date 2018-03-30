@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.sqless.sqlessmobile.ui.DatabaseActionsActivity"
+    tools:context="com.sqless.sqlessmobile.ui.activities.DatabaseActionsActivity"
     tools:showIn="@layout/app_bar_database_actions">
 
 </android.support.constraint.ConstraintLayout>

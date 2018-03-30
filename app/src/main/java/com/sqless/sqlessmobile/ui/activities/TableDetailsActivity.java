@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui;
+package com.sqless.sqlessmobile.ui.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.FragmentPagerTableDetailsAdapter;
 
 public class TableDetailsActivity extends AppCompatActivity implements FragmentInteractionListener {
 
@@ -18,7 +20,7 @@ public class TableDetailsActivity extends AppCompatActivity implements FragmentI
         ViewPager viewPager = findViewById(R.id.viewpager);
 
         // Create an adapter that knows which fragment should be shown on each page
-        SimpleFragmentPagerAdapter adapter = new SimpleFragmentPagerAdapter(this, getSupportFragmentManager(), getIntent().getExtras());
+        FragmentPagerTableDetailsAdapter adapter = new FragmentPagerTableDetailsAdapter(this, getSupportFragmentManager(), getIntent().getExtras());
 
         // Set the adapter onto the view pager
         viewPager.setAdapter(adapter);
