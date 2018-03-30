@@ -3,30 +3,22 @@ package com.sqless.sqlessmobile.sqlobjects;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.Iconable;
 
-import java.io.Serializable;
+public class SQLColumn extends SQLObject implements Iconable {
 
-public class SQLColumn implements Iconable, Serializable {
-
-    private String nombre;
     private String datatype;
     private boolean isPK;
     private boolean isFK;
     private boolean nullable;
 
     public SQLColumn(String nombre, String datatype) {
-        this.nombre = nombre;
+        super(nombre);
         this.datatype = datatype;
     }
 
     public SQLColumn(String nombre, String datatype, boolean isPK, boolean nullable) {
-        this.nombre = nombre;
-        this.datatype = datatype;
+        this(nombre, datatype);
         this.isPK = isPK;
         this.nullable = nullable;
-    }
-
-    public String getNombre() {
-        return nombre;
     }
 
     public String getDatatype() {
@@ -56,6 +48,6 @@ public class SQLColumn implements Iconable, Serializable {
 
     @Override
     public String toString() {
-        return nombre + " (" + datatype + ")";
+        return getNombre() + " (" + datatype + ")";
     }
 }

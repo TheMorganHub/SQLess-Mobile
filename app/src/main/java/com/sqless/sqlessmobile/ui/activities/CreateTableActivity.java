@@ -13,8 +13,10 @@ import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
 import com.sqless.sqlessmobile.ui.FragmentPagerCreateTableAdapter;
-import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnAddedEvent;
+import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
+import com.sqless.sqlessmobile.ui.busevents.createtable.MustGenerateSQLEvent;
 import com.sqless.sqlessmobile.ui.fragments.AbstractFragment;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -30,7 +32,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
         setContentView(R.layout.activity_create_table);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        newTable = savedInstanceState == null ? new SQLTable() : (SQLTable) savedInstanceState.getSerializable("NEW_TABLE");
+        newTable = savedInstanceState == null ? new SQLTable("") : (SQLTable) savedInstanceState.getSerializable("NEW_TABLE");
 
         bus.register(this);
 
@@ -54,10 +56,16 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
                 switch (position) {
                     case 0:
                     case 1:
-                        AbstractFragment fragment = adapter.getRegisteredFragment(position);
-                        fab.setOnClickListener(view -> fragment.onFabClicked());
-                        fab.show();
+                        //el invokeLaterOnUI le permite al adapter llenarse con los fragmentos antes de ejecutarse este bloque de código, si no esperamos, el adapter devolverá un fragment null
+                        UIUtils.invokeLaterOnUI(() -> {
+                            AbstractFragment fragment = adapter.getRegisteredFragment(position);
+                            fab.setOnClickListener(view -> fragment.onFabClicked());
+                            fab.show();
+                        });
                         break;
+                    case 2:
+                        fab.hide();
+                        bus.post(new MustGenerateSQLEvent(newTable));
                     default:
                         fab.hide();
                         break;
@@ -99,15 +107,29 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
         return false;
     }
 
-    @Subscribe
-    public void onColumnAddedEvent(ColumnAddedEvent event) {
-        newTable.addColumn(event.column);
-    }
-
-
     @Override
     public void onInteraction(String title, SQLConnectionManager.ConnectionData data) {
         setTitle(title);
     }
 
+    @Subscribe
+    public void onColumnAddedEvent(ColumnEvents.ColumnAddedEvent event) {
+        newTable.addColumn(event.column);
+    }
+
+    @Subscribe
+    public void onColumnRequestEvent(ColumnEvents.ColumnRequestEvent event) {
+        bus.post(new ColumnEvents.ColumnsReceivedEvent(newTable.getColumns()));
+    }
+
+    @Subscribe
+    public void onFkAddedEvent(ColumnEvents.FKAddedEvent event) {
+        newTable.addFK(event.foreignKey);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bus.unregister(this);
+    }
 }

@@ -97,7 +97,7 @@ public class SQLUtils {
                 while (rs.next()) {
                     names.add(rs.getString(1));
                 }
-                UIUtils.invokeOnUI(() -> callbackSuccess.exec(names));
+                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(names));
             }
 
             @Override
@@ -116,15 +116,35 @@ public class SQLUtils {
                 while (rs.next()) {
                     tableNames.add(rs.getString(1));
                 }
-                UIUtils.invokeOnUI(() -> callbackSuccess.exec(tableNames));
+                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(tableNames));
             }
 
             @Override
             public void onFailure(String errMessage) {
-                UIUtils.invokeOnUI(() -> callbackFailure.exec(errMessage));
+                UIUtils.invokeLaterOnUI(() -> callbackFailure.exec(errMessage));
             }
         };
         tablesQuery.exec();
+    }
+
+    public static void getColumnNamesInTable(SQLConnectionManager.ConnectionData connectionData, String tableName,
+                                             boolean newThread, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery columnNamesQuery = new SQLSelectQuery(connectionData, "SHOW COLUMNS FROM " + tableName, newThread) {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                List<String> columnNames = new ArrayList<>();
+                while (rs.next()) {
+                    columnNames.add(rs.getString("Field"));
+                }
+                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(columnNames));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeLaterOnUI(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        columnNamesQuery.exec();
     }
 
     public static void getColumns(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
@@ -163,12 +183,12 @@ public class SQLUtils {
                     }
                 };
                 fkQuery.exec();
-                UIUtils.invokeOnUI(() -> callbackSuccess.exec(columns));
+                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(columns));
             }
 
             @Override
             public void onFailure(String errMessage) {
-                UIUtils.invokeOnUI(() -> callbackFailure.exec(errMessage));
+                UIUtils.invokeLaterOnUI(() -> callbackFailure.exec(errMessage));
             }
         };
         columnsQuery.exec();
