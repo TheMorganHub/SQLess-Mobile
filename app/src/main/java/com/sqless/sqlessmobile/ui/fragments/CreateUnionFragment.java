@@ -59,7 +59,9 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
             foreignKeys = new ArrayList<>();
             adapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_foreign_key_24dp), foreignKeys);
         }
-        bus.register(this);
+        if (!bus.isRegistered(this)) {
+            bus.register(this);
+        }
         lvUnions.setAdapter(adapter);
         fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(foreignKeys.isEmpty() ? View.VISIBLE : View.INVISIBLE);
     }
@@ -159,7 +161,9 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
     @Override
     public void onDetach() {
         super.onDetach();
-        bus.unregister(this);
+        if (bus.isRegistered(this)) {
+            bus.unregister(this);
+        }
     }
 
     @Override

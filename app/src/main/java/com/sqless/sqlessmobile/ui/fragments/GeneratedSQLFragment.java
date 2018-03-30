@@ -30,13 +30,17 @@ public class GeneratedSQLFragment extends AbstractFragment {
 
     @Override
     public void afterCreate() {
-        bus.register(this);
+        if (!bus.isRegistered(this)) {
+            bus.register(this);
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        bus.unregister(this);
+        if (bus.isRegistered(this)) {
+            bus.unregister(this);
+        }
     }
 
     @Override
