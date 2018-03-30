@@ -1,14 +1,14 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.ui.busevents.createtable.MustGenerateSQLEvent;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class GeneratedSQLFragment extends AbstractFragment {
 
@@ -18,17 +18,9 @@ public class GeneratedSQLFragment extends AbstractFragment {
         // Required empty public constructor
     }
 
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_generated_sql, container, false);
-    }
-
     @Override
     protected String getTitle() {
-        return "Create table";
+        return "Crear tabla";
     }
 
     @Override
@@ -38,11 +30,18 @@ public class GeneratedSQLFragment extends AbstractFragment {
 
     @Override
     public void afterCreate() {
-
+        if (!bus.isRegistered(this)) {
+            bus.register(this);
+        }
     }
 
     @Override
     protected void implementListeners(View containerView) {
+    }
+
+    @Subscribe
+    public void onMustGenerateSQLEvent(MustGenerateSQLEvent event) {
+        Log.i("MSJ", "BWERK");
     }
 
 }

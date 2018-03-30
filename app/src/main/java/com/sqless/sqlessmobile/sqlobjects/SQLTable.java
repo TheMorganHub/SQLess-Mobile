@@ -1,34 +1,35 @@
 package com.sqless.sqlessmobile.sqlobjects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLTable implements Serializable {
+public class SQLTable extends SQLObject {
 
-    private String name;
     private List<SQLColumn> columns;
+    private List<SQLForeignKey> foreignKeys;
 
-    public SQLTable() {
+    public SQLTable(String nombre) {
+        super(nombre);
         columns = new ArrayList<>();
+        foreignKeys = new ArrayList<>();
     }
 
     public void addColumn(SQLColumn column) {
         columns.add(column);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void addFK(SQLForeignKey fk) {
+        foreignKeys.add(fk);
     }
 
-    public String getName() {
-        return name;
+    public List<SQLColumn> getColumns() {
+        return columns;
     }
 
     @Override
     public String toString() {
         return "SQLTable{" +
-                "name='" + name + '\'' +
+                "name='" + getNombre() + '\'' +
                 ", columns=" + columns +
                 '}';
     }

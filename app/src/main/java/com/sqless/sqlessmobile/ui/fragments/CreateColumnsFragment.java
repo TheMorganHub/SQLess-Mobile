@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.ui.adapters.ListViewColumnDetailsAdapter;
-import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnAddedEvent;
+import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -33,7 +33,7 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
 
     @Override
     protected String getTitle() {
-        return "Create table";
+        return "Crear tabla";
     }
 
     @Override
@@ -68,7 +68,7 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
         }
 
         activeDialog.dismiss();
-        bus.post(new ColumnAddedEvent(newColumn));
+        bus.post(new ColumnEvents.ColumnAddedEvent(newColumn));
     }
 
     public void createNewColumnDialog() {

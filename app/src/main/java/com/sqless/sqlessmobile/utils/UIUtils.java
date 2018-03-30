@@ -12,7 +12,7 @@ public class UIUtils {
      *
      * @param runnable el Runnable a ejecutar.
      */
-    public static void invokeOnUI(Runnable runnable) {
+    public static void invokeLaterOnUI(Runnable runnable) {
         new Handler(Looper.getMainLooper()).post(runnable);
     }
 
