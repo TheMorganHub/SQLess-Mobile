@@ -25,12 +25,26 @@ public class SQLColumn extends SQLObject implements Iconable {
         return datatype;
     }
 
+    public String getDatatypeWithDefaultLength() {
+        switch (datatype) {
+            case "varchar":
+                return "varchar(255)";
+            case "decimal":
+                return "decimal(10,2)";
+        }
+        return getDatatype();
+    }
+
     public void setIsPK(boolean flag) {
         this.isPK = flag;
     }
 
     public void setIsFK(boolean flag) {
         this.isFK = flag;
+    }
+
+    public boolean isPK() {
+        return isPK;
     }
 
     @Override
@@ -46,8 +60,12 @@ public class SQLColumn extends SQLObject implements Iconable {
         return nullable;
     }
 
+    public String getCreateLine() {
+        return "`" + getName() + "` " + getDatatypeWithDefaultLength() + " " + (isNullable() ? "NULL" : "NOT NULL");
+    }
+
     @Override
     public String toString() {
-        return getNombre() + " (" + datatype + ")";
+        return getName() + " (" + datatype + ")";
     }
 }

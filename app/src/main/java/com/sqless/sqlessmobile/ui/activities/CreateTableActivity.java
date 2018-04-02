@@ -1,14 +1,19 @@
 package com.sqless.sqlessmobile.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.db.queries.SQLQuery;
+import com.sqless.sqlessmobile.db.queries.SQLUpdateQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
@@ -25,6 +30,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
 
     private SQLTable newTable;
     EventBus bus = EventBus.getDefault();
+    private SQLConnectionManager.ConnectionData connectionData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +39,8 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         newTable = savedInstanceState == null ? new SQLTable("") : (SQLTable) savedInstanceState.getSerializable("NEW_TABLE");
+        connectionData = (SQLConnectionManager.ConnectionData) (savedInstanceState == null ? getIntent().getSerializableExtra("CONNECTION_DATA")
+                : savedInstanceState.getSerializable("CONNECTION_DATA"));
 
         bus.register(this);
 
@@ -82,6 +90,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable("NEW_TABLE", newTable);
+        outState.putSerializable("CONNECTION_DATA", connectionData);
     }
 
     @Override
@@ -100,11 +109,33 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
                 finish();
                 return true;
             case R.id.btn_confirm_table_creation:
-                //TODO create table creation script and execute. Mandar un RESULT_OK si todo salió bien.
+                confirmTableCreation();
                 return true;
         }
 
         return false;
+    }
+
+    public void confirmTableCreation() {
+        UIUtils.showInputDialog(this, "Nombre", nombre -> {
+            newTable.setName(nombre);
+            SQLQuery createTableQuery = new SQLUpdateQuery(connectionData, newTable.generateCreateStatement()) {
+                @Override
+                public void onConnectionKilled() {
+                    UIUtils.invokeLaterOnUI(() -> {
+                        setResult(RESULT_OK, new Intent().putExtra("NEW_TABLE", newTable));
+                        finish();
+                    });
+                }
+
+                @Override
+                public void onFailure(String errMessage) {
+                    Log.e("ERR", errMessage);
+                    UIUtils.invokeLaterOnUI(() -> Toast.makeText(CreateTableActivity.this, "Hubo un error al crear la tabla", Toast.LENGTH_SHORT).show());
+                }
+            };
+            createTableQuery.exec();
+        });
     }
 
     @Override

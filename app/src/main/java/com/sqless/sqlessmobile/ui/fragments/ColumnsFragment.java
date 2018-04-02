@@ -26,7 +26,7 @@ public class ColumnsFragment extends AbstractFragment {
         ProgressBar progressBar = fragmentView.findViewById(R.id.column_progress_bar);
         if (columnsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getColumns(connectionData, true, sqlColumns -> {
+            SQLUtils.getColumns(connectionData, sqlColumns -> {
                 columns = sqlColumns;
                 columnsAdapter = new ListViewImageAdapter<>(getContext(), columns);
                 lv_columnas.setAdapter(columnsAdapter);

@@ -88,7 +88,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
 
         ProgressBar progressBar = viewInflated.findViewById(R.id.progress_ref_table);
         progressBar.setVisibility(View.VISIBLE);
-        SQLUtils.getTableNames(connectionData, true, names -> {
+        SQLUtils.getTableNames(connectionData, names -> {
             if (activeDialog != null && activeDialog.isShowing()) {
                 spinnerRefTableAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, names);
                 tablesSpinner.setAdapter(spinnerRefTableAdapter);
@@ -117,7 +117,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
     public void onClick(View view) {
         View inflatedView = view.getRootView();
         String fkNombre = ((EditText) inflatedView.findViewById(R.id.txt_fk_name)).getText().toString();
-        String fkColumna = ((SQLColumn) ((Spinner) inflatedView.findViewById(R.id.sp_fk_col_name)).getSelectedItem()).getNombre();
+        String fkColumna = ((SQLColumn) ((Spinner) inflatedView.findViewById(R.id.sp_fk_col_name)).getSelectedItem()).getName();
         String fkRefTableName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_table)).getSelectedItem().toString();
         String fkRefColName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_col)).getSelectedItem().toString();
         SQLForeignKey newFk = new SQLForeignKey(fkNombre, fkColumna, fkRefTableName, fkRefColName);
@@ -144,7 +144,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
         progressBar.setVisibility(View.VISIBLE);
         String tableNameSelected = spinnerRefTableAdapter.getItem(i);
         Spinner refColumnsSpinner = dialogInflatedView.findViewById(R.id.sp_fk_ref_col);
-        SQLUtils.getColumnNamesInTable(connectionData, tableNameSelected, true, names -> {
+        SQLUtils.getColumnNamesInTable(connectionData, tableNameSelected, names -> {
             if (activeDialog != null && activeDialog.isShowing()) {
                 spinnerRefColumnAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, names);
                 refColumnsSpinner.setAdapter(spinnerRefColumnAdapter);

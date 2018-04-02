@@ -48,7 +48,7 @@ public class ListViewColumnDetailsAdapter extends ArrayAdapter<SQLColumn> {
         }
 
         viewHolder.ivColumnKey.setImageDrawable(getContext().getResources().getDrawable(item.getDrawableRes()));
-        viewHolder.tvColumnName.setText(item.getNombre());
+        viewHolder.tvColumnName.setText(item.getName());
         viewHolder.tvColumnDatatype.setText(item.getDatatype());
         viewHolder.tvColumnNullable.setText("Nullable? " + (item.isNullable() ? "Sí" : "No"));
 

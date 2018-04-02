@@ -89,8 +89,8 @@ public class SQLUtils {
      * @param callbackSuccess El callback que se ejecutará si la consulta es exitosa. Al callback
      *                        se le pasará como parámetro una lista con los nombres de las bases de datos. Este mismo se ejecutará en el thread de UI.
      */
-    public static void getDatabaseNames(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<String>> callbackSuccess) {
-        SQLQuery nameQuery = new SQLSelectQuery(connectionData, "SHOW DATABASES", newThread) {
+    public static void getDatabaseNames(SQLConnectionManager.ConnectionData connectionData, Callback<List<String>> callbackSuccess) {
+        SQLQuery nameQuery = new SQLSelectQuery(connectionData, "SHOW DATABASES") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<String> names = new ArrayList<>();
@@ -108,8 +108,8 @@ public class SQLUtils {
         nameQuery.exec();
     }
 
-    public static void getTableNames(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
-        SQLQuery tablesQuery = new SQLSelectQuery(connectionData, "show full tables where Table_Type = 'BASE TABLE' OR Table_Type = 'SYSTEM VIEW'", newThread) {
+    public static void getTableNames(SQLConnectionManager.ConnectionData connectionData, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery tablesQuery = new SQLSelectQuery(connectionData, "show full tables where Table_Type = 'BASE TABLE' OR Table_Type = 'SYSTEM VIEW'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<String> tableNames = new ArrayList<>();
@@ -127,9 +127,8 @@ public class SQLUtils {
         tablesQuery.exec();
     }
 
-    public static void getColumnNamesInTable(SQLConnectionManager.ConnectionData connectionData, String tableName,
-                                             boolean newThread, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
-        SQLQuery columnNamesQuery = new SQLSelectQuery(connectionData, "SHOW COLUMNS FROM " + tableName, newThread) {
+    public static void getColumnNamesInTable(SQLConnectionManager.ConnectionData connectionData, String tableName, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery columnNamesQuery = new SQLSelectQuery(connectionData, "SHOW COLUMNS FROM " + tableName) {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<String> columnNames = new ArrayList<>();
@@ -147,10 +146,10 @@ public class SQLUtils {
         columnNamesQuery.exec();
     }
 
-    public static void getColumns(SQLConnectionManager.ConnectionData connectionData, boolean newThread, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
+    public static void getColumns(SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery columnsQuery = new SQLSelectQuery(connectionData,
                 "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = '" + connectionData.database
-                        + "' AND TABLE_NAME = '" + connectionData.getTableName() + "'", newThread) {
+                        + "' AND TABLE_NAME = '" + connectionData.getTableName() + "'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<SQLColumn> columns = new ArrayList<>();
@@ -168,13 +167,13 @@ public class SQLUtils {
                         "LEFT JOIN information_schema.REFERENTIAL_CONSTRAINTS r ON r.CONSTRAINT_NAME = k.CONSTRAINT_NAME\n" +
                         "WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'\n" +
                         "AND i.TABLE_SCHEMA = '" + connectionData.database + "'\n" +
-                        "AND i.TABLE_NAME = '" + connectionData.getTableName() + "';") {
+                        "AND i.TABLE_NAME = '" + connectionData.getTableName() + "';", false) {
                     @Override
                     public void onSuccess(ResultSet rs) throws SQLException {
                         while (rs.next()) {
                             String colFkName = rs.getString(1);
                             for (SQLColumn column : columns) {
-                                if (column.getNombre().equals(colFkName)) {
+                                if (column.getName().equals(colFkName)) {
                                     column.setIsFK(true);
                                     break;
                                 }

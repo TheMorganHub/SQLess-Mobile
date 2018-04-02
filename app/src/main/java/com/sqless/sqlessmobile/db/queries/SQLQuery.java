@@ -1,7 +1,5 @@
 package com.sqless.sqlessmobile.db.queries;
 
-import android.util.Log;
-
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
@@ -14,16 +12,20 @@ public abstract class SQLQuery {
     private String sql;
     protected boolean newThread;
     protected SQLConnectionManager.ConnectionData connectionData;
+    /**
+     * Denota si la ejecución de una query fue exitosa.
+     */
+    protected boolean querySuccess;
 
     public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql) {
         this.sql = SQLUtils.filterDelimiterKeyword(sql);
         this.connectionData = conData;
+        querySuccess = false;
     }
 
     public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql, boolean newThread) {
         this(conData, sql);
         this.newThread = newThread;
-
     }
 
     public String getSql() {
@@ -31,17 +33,13 @@ public abstract class SQLQuery {
     }
 
     /**
-     * Called upon execution failure of a query IF {@code defaultErrorHandling}
-     * is false. This method is empty by default. Children are free to override
+     * Called upon execution failure of a query.
+     * This method is empty by default. Children are free to override
      * it as they please.
      *
      * @param errMessage The error message produced by the SQL engine.
      */
     public void onFailure(String errMessage) {
-    }
-
-    public void onFaiureStandard(String errMessage) {
-        Log.e("Error", errMessage);
     }
 
     /**
@@ -60,6 +58,13 @@ public abstract class SQLQuery {
     }
 
     /**
+     * Se ejecutará este método luego de que la conexión de esta query muera SÓLO si la query fue exitosa.
+     * Es decir, este método sólo se ejecutará si {@link #querySuccess} fue seteado {@code true}.
+     */
+    public void onConnectionKilled() {
+    }
+
+    /**
      * Contiene la lógica de ejecución de la query. El manejo de threads se hace en {@link #exec()}.
      */
     protected abstract void doExecute();
@@ -71,7 +76,8 @@ public abstract class SQLQuery {
         try {
             if (statement != null) {
                 statement.close();
-                connectionData.killConnectionIfActive();
+                connectionData.killConnectionIfActive(querySuccess ? this::onConnectionKilled : () -> {
+                });
             }
         } catch (SQLException e) {
         }

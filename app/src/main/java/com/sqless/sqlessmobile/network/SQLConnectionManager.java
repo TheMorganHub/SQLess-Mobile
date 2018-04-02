@@ -49,7 +49,7 @@ public class SQLConnectionManager {
             try (Connection testCon = DriverManager.getConnection("jdbc:drizzle://" + hostName + ":" + port + "/mysql?connectTimeout=3", username, password)) {
                 lastSuccessful = new ConnectionData(hostName, port, "mysql", username, password);
 
-                SQLUtils.getDatabaseNames(lastSuccessful, false, names -> {
+                SQLUtils.getDatabaseNames(lastSuccessful, names -> {
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, names);
                     ((Spinner) v.findViewById(R.id.spinner_dbs)).setAdapter(adapter);
                     v.findViewById(R.id.spinner_dbs).setVisibility(View.VISIBLE);
@@ -58,9 +58,7 @@ public class SQLConnectionManager {
             } catch (SQLException e) {
                 Log.e("SQLConnectionManager", "Test failed");
                 Log.e("SQLConnectionManager", e.getMessage());
-                v.post(() -> {
-                    callbackFailure.exec(e.getMessage());
-                });
+                v.post(() -> callbackFailure.exec(e.getMessage()));
             } finally {
                 v.post(() -> {
                     if (layProgress != null && layInner != null) {
@@ -149,19 +147,22 @@ public class SQLConnectionManager {
             return connection;
         }
 
-        public void killConnectionIfActive() {
-            Thread t = new Thread(() -> {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                        connection = null;
-                        Log.i("SQLConnectionManager", "Killed active connection.");
-                    } catch (SQLException ex) {
-                        Log.e("ERR", "No se pudo matar la conexión");
-                    }
+        /**
+         * Mata la conexión activa y ejecuta el runnable dado una vez matada la conexión.
+         *
+         * @param runAfter
+         */
+        public void killConnectionIfActive(Runnable runAfter) {
+            if (connection != null) {
+                try {
+                    connection.close();
+                    connection = null;
+                    Log.i("SQLConnectionManager", "Killed active connection.");
+                    runAfter.run();
+                } catch (SQLException ex) {
+                    Log.e("ERR", "No se pudo matar la conexión");
                 }
-            });
-            t.start();
+            }
         }
 
         public String getNombre() {

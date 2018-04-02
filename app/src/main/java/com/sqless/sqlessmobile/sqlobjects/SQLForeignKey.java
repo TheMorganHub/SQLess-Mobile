@@ -25,8 +25,13 @@ public class SQLForeignKey extends SQLObject {
         return referencedColumn;
     }
 
+    public String getStatementForCreate() {
+        return "CONSTRAINT `" + getName() + "` FOREIGN KEY (`" + getColumnName() + "`) REFERENCES `" + getReferencedTable()
+                + "` (`" + getReferencedColumn() + "`) ON DELETE CASCADE ON UPDATE CASCADE";
+    }
+
     @Override
     public String toString() {
-        return getNombre() + " (" + columnName + ") → " + referencedTable + " (" + referencedColumn + ")";
+        return getName() + " (" + columnName + ") → " + referencedTable + " (" + referencedColumn + ")";
     }
 }

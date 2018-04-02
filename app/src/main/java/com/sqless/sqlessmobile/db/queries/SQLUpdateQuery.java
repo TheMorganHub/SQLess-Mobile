@@ -7,10 +7,25 @@ import java.sql.SQLException;
 
 public class SQLUpdateQuery extends SQLQuery {
 
+    /**
+     * Crea una nueva {@code UPDATE} query. La query se ejecutará en un thread diferente al
+     * que creó este objeto.
+     *
+     * @param connectionData
+     * @param sql
+     */
     public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql) {
-        super(connectionData, sql);
+        super(connectionData, sql, true);
     }
 
+    /**
+     * Crea una nueva {@code UPDATE} query. El usuario tiene la opción de elegir si la query se
+     * ejecutará en el mismo thread que construyó este objeto u otro nuevo.
+     *
+     * @param connectionData
+     * @param sql
+     * @param newThread
+     */
     public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
         super(connectionData, sql, newThread);
     }
@@ -23,6 +38,7 @@ public class SQLUpdateQuery extends SQLQuery {
                 statement = conFromData.createStatement();
                 int affectedRows = statement.executeUpdate(getSql());
                 onSuccess(affectedRows);
+                querySuccess = true;
             } else {
                 throw new SQLException("La conexión es nula");
             }

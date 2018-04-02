@@ -9,6 +9,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
 import com.sqless.sqlessmobile.ui.activities.CreateTableActivity;
 import com.sqless.sqlessmobile.ui.activities.TableDetailsActivity;
@@ -52,7 +53,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         ProgressBar progressBar = fragmentView.findViewById(R.id.progress_bar);
         if (tablesAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getTableNames(connectionData, true, names -> {
+            SQLUtils.getTableNames(connectionData, names -> {
                 tableNames = names;
                 tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tableNames);
                 lv_tables.setAdapter(tablesAdapter);
@@ -79,7 +80,9 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         switch (requestCode) {
             case TABLE_CREATION_RESULT:
                 if (resultCode == Activity.RESULT_OK) {
-                    //TODO el usuario creo una tabla y hay que refrescar el listview con tablas
+                    SQLTable newTable = (SQLTable) data.getSerializableExtra("NEW_TABLE");
+                    tableNames.add(newTable.getName());
+                    tablesAdapter.notifyDataSetChanged();
                 }
                 break;
         }
