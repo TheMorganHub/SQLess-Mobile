@@ -6,7 +6,7 @@ import android.widget.ProgressBar;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
-import com.sqless.sqlessmobile.ui.adapters.ListViewImageAdapter;
+import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;

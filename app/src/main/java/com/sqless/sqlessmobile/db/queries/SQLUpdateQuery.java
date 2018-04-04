@@ -2,7 +2,6 @@ package com.sqless.sqlessmobile.db.queries;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SQLUpdateQuery extends SQLQuery {
@@ -33,9 +32,9 @@ public class SQLUpdateQuery extends SQLQuery {
     @Override
     protected void doExecute() {
         try {
-            Connection conFromData = SQLConnectionManager.getInstance().getConnection(connectionData);
-            if (conFromData != null) {
-                statement = conFromData.createStatement();
+            connection = connectionData.makeConnection();
+            if (connection != null) {
+                statement = connection.createStatement();
                 int affectedRows = statement.executeUpdate(getSql());
                 onSuccess(affectedRows);
                 querySuccess = true;

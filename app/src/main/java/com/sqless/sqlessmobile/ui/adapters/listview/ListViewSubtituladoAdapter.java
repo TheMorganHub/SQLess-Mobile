@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui.adapters;
+package com.sqless.sqlessmobile.ui.adapters.listview;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;

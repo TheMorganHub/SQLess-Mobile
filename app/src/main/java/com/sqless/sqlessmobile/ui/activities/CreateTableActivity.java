@@ -64,8 +64,8 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
                 switch (position) {
                     case 0:
                     case 1:
-                        //el invokeLaterOnUI le permite al adapter llenarse con los fragmentos antes de ejecutarse este bloque de código, si no esperamos, el adapter devolverá un fragment null
-                        UIUtils.invokeLaterOnUI(() -> {
+                        //el invokeOnUIThread le permite al adapter llenarse con los fragmentos antes de ejecutarse este bloque de código, si no esperamos, el adapter devolverá un fragment null
+                        UIUtils.invokeOnUIThread(() -> {
                             AbstractFragment fragment = adapter.getRegisteredFragment(position);
                             fab.setOnClickListener(view -> fragment.onFabClicked());
                             fab.show();
@@ -122,7 +122,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
             SQLQuery createTableQuery = new SQLUpdateQuery(connectionData, newTable.generateCreateStatement()) {
                 @Override
                 public void onConnectionKilled() {
-                    UIUtils.invokeLaterOnUI(() -> {
+                    UIUtils.invokeOnUIThread(() -> {
                         setResult(RESULT_OK, new Intent().putExtra("NEW_TABLE", newTable));
                         finish();
                     });
@@ -131,7 +131,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
                 @Override
                 public void onFailure(String errMessage) {
                     Log.e("ERR", errMessage);
-                    UIUtils.invokeLaterOnUI(() -> Toast.makeText(CreateTableActivity.this, "Hubo un error al crear la tabla", Toast.LENGTH_SHORT).show());
+                    UIUtils.invokeOnUIThread(() -> Toast.makeText(CreateTableActivity.this, "Hubo un error al crear la tabla", Toast.LENGTH_SHORT).show());
                 }
             };
             createTableQuery.exec();

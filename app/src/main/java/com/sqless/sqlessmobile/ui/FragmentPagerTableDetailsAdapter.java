@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.ui.fragments.AbstractFragment;
 import com.sqless.sqlessmobile.ui.fragments.ColumnsFragment;
-import com.sqless.sqlessmobile.ui.fragments.IndicesFragment;
+import com.sqless.sqlessmobile.ui.fragments.TableHtmlFragment;
 
 public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
     private Context mContext;
@@ -31,7 +31,7 @@ public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
                 f = AbstractFragment.newInstance(connectionData, ColumnsFragment.class);
                 break;
             default:
-                f = AbstractFragment.newInstance(connectionData, IndicesFragment.class);
+                f = AbstractFragment.newInstance(connectionData, TableHtmlFragment.class);
                 break;
         }
         return f;
@@ -51,7 +51,7 @@ public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
             case 0:
                 return "COLUMNAS";
             case 1:
-                return "INDICES";
+                return "CONTENIDO";
             default:
                 return null;
         }

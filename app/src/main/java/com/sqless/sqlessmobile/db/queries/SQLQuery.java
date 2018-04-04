@@ -1,8 +1,12 @@
 package com.sqless.sqlessmobile.db.queries;
 
+import android.util.Log;
+
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -16,6 +20,7 @@ public abstract class SQLQuery {
      * Denota si la ejecución de una query fue exitosa.
      */
     protected boolean querySuccess;
+    protected Connection connection;
 
     public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql) {
         this.sql = SQLUtils.filterDelimiterKeyword(sql);
@@ -76,10 +81,16 @@ public abstract class SQLQuery {
         try {
             if (statement != null) {
                 statement.close();
-                connectionData.killConnectionIfActive(querySuccess ? this::onConnectionKilled : () -> {
-                });
+                connection.close();
+                connection = null;
+                Log.i("SQLQuery", "Killed query connection.");
+                if (querySuccess) {
+                    UIUtils.invokeOnUIThread(this::onConnectionKilled);
+                    onConnectionKilled();
+                }
             }
         } catch (SQLException e) {
+            Log.e("SQLQuery", "No se pudo matar la conexión");
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.sqless.sqlessmobile.ui.adapters;
+package com.sqless.sqlessmobile.ui.adapters.listview;
 
 import android.content.Context;
 

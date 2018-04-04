@@ -97,7 +97,7 @@ public class SQLUtils {
                 while (rs.next()) {
                     names.add(rs.getString(1));
                 }
-                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(names));
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(names));
             }
 
             @Override
@@ -116,12 +116,12 @@ public class SQLUtils {
                 while (rs.next()) {
                     tableNames.add(rs.getString(1));
                 }
-                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(tableNames));
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(tableNames));
             }
 
             @Override
             public void onFailure(String errMessage) {
-                UIUtils.invokeLaterOnUI(() -> callbackFailure.exec(errMessage));
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
             }
         };
         tablesQuery.exec();
@@ -135,12 +135,12 @@ public class SQLUtils {
                 while (rs.next()) {
                     columnNames.add(rs.getString("Field"));
                 }
-                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(columnNames));
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(columnNames));
             }
 
             @Override
             public void onFailure(String errMessage) {
-                UIUtils.invokeLaterOnUI(() -> callbackFailure.exec(errMessage));
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
             }
         };
         columnNamesQuery.exec();
@@ -182,12 +182,12 @@ public class SQLUtils {
                     }
                 };
                 fkQuery.exec();
-                UIUtils.invokeLaterOnUI(() -> callbackSuccess.exec(columns));
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(columns));
             }
 
             @Override
             public void onFailure(String errMessage) {
-                UIUtils.invokeLaterOnUI(() -> callbackFailure.exec(errMessage));
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
             }
         };
         columnsQuery.exec();

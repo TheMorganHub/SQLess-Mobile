@@ -15,7 +15,7 @@ import android.widget.Spinner;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.sqlobjects.SQLForeignKey;
-import com.sqless.sqlessmobile.ui.adapters.ListViewImageAdapter;
+import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 

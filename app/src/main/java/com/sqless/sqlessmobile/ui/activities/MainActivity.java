@@ -21,7 +21,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.HelperDB;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
-import com.sqless.sqlessmobile.ui.adapters.ListViewSubtituladoAdapter;
+import com.sqless.sqlessmobile.ui.adapters.listview.ListViewSubtituladoAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.UIUtils;
 

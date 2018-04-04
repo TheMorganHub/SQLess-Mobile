@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
-import com.sqless.sqlessmobile.ui.adapters.ListViewColumnDetailsAdapter;
+import com.sqless.sqlessmobile.ui.adapters.listview.ListViewColumnDetailsAdapter;
 import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
 
 import org.greenrobot.eventbus.EventBus;

@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.sqless.sqlessmobile.R;
-import com.sqless.sqlessmobile.ui.adapters.Subtitulado;
+import com.sqless.sqlessmobile.ui.adapters.listview.Subtitulado;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
@@ -96,7 +96,6 @@ public class SQLConnectionManager {
         public String username;
         public String password;
         private String tableName;
-        private Connection connection;
 
         public ConnectionData(long id, String host, String port, String database, String username, String password) {
             this(host, port, database, username, password);
@@ -137,32 +136,13 @@ public class SQLConnectionManager {
         }
 
         public Connection makeConnection() {
+            Connection conn = null;
             try {
-                if (connection == null || connection.isClosed()) {
-                    connection = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3", username, password);
-                }
-            } catch (SQLException ex) {
-                Log.e("ERR", "Could not create activeConnection");
+                conn = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3", username, password);
+            } catch (SQLException e) {
+                Log.e("ERR", "Could not create connection");
             }
-            return connection;
-        }
-
-        /**
-         * Mata la conexión activa y ejecuta el runnable dado una vez matada la conexión.
-         *
-         * @param runAfter
-         */
-        public void killConnectionIfActive(Runnable runAfter) {
-            if (connection != null) {
-                try {
-                    connection.close();
-                    connection = null;
-                    Log.i("SQLConnectionManager", "Killed active connection.");
-                    runAfter.run();
-                } catch (SQLException ex) {
-                    Log.e("ERR", "No se pudo matar la conexión");
-                }
-            }
+            return conn;
         }
 
         public String getNombre() {

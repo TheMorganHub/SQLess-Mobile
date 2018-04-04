@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -21,7 +20,7 @@ public class UIUtils {
      *
      * @param runnable el Runnable a ejecutar.
      */
-    public static void invokeLaterOnUI(Runnable runnable) {
+    public static void invokeOnUIThread(Runnable runnable) {
         new Handler(Looper.getMainLooper()).post(runnable);
     }
 
@@ -49,15 +48,9 @@ public class UIUtils {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
 
-        // Set up the input
-        final EditText input = new EditText(context);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         View viewInflated = LayoutInflater.from(context).inflate(R.layout.input_dialog, ((Activity) context).findViewById(android.R.id.content), false);
         EditText txtInput = viewInflated.findViewById(R.id.txt_input);
 
-
-        // Set up the buttons
         builder.setPositiveButton("OK", (dialog, which) -> callbackYes.exec(txtInput.getText().toString()));
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.setView(viewInflated);

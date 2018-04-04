@@ -3,12 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.IndicesFragment">
+    tools:context=".ui.fragments.TableHtmlFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <WebView
+        android:id="@+id/wv_table"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
+        android:layout_height="match_parent" />
 </FrameLayout>

@@ -13,7 +13,7 @@ import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
 import com.sqless.sqlessmobile.ui.activities.CreateTableActivity;
 import com.sqless.sqlessmobile.ui.activities.TableDetailsActivity;
-import com.sqless.sqlessmobile.ui.adapters.ListViewImageAdapter;
+import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;
