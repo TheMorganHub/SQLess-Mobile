@@ -86,7 +86,6 @@ public abstract class SQLQuery {
                 Log.i("SQLQuery", "Killed query connection.");
                 if (querySuccess) {
                     UIUtils.invokeOnUIThread(this::onConnectionKilled);
-                    onConnectionKilled();
                 }
             }
         } catch (SQLException e) {

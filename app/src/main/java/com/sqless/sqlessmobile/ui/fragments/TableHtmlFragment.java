@@ -60,6 +60,7 @@ public class TableHtmlFragment extends AbstractFragment {
                     sb.append("<th>").append(header).append("</th>");
                 }
                 sb.append("</tr>");
+                sb.append("<tbody>");
 
                 int rowCount = 0;
                 while (rs.next()) {
@@ -70,6 +71,7 @@ public class TableHtmlFragment extends AbstractFragment {
                     }
                     sb.append("</tr>");
                 }
+                sb.append("</tbody>");
                 sb.append("</table>");
 
                 UIUtils.invokeOnUIThread(() -> {
