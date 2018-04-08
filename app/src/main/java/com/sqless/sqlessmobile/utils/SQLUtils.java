@@ -127,6 +127,25 @@ public class SQLUtils {
         tablesQuery.exec();
     }
 
+    public static void getViewNames(SQLConnectionManager.ConnectionData connectionData, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery viewsQuery = new SQLSelectQuery(connectionData, "SHOW FULL TABLES IN " + connectionData.database + " WHERE TABLE_TYPE LIKE 'VIEW'") {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                List<String> viewNames = new ArrayList<>();
+                while (rs.next()) {
+                    viewNames.add(rs.getString(1));
+                }
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(viewNames));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        viewsQuery.exec();
+    }
+
     public static void getColumnNamesInTable(SQLConnectionManager.ConnectionData connectionData, String tableName, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery columnNamesQuery = new SQLSelectQuery(connectionData, "SHOW COLUMNS FROM " + tableName) {
             @Override
@@ -144,6 +163,29 @@ public class SQLUtils {
             }
         };
         columnNamesQuery.exec();
+    }
+
+    public static void getViewColumns(SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery viewColumnsQuery = new SQLSelectQuery(connectionData, "SELECT * FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = " +
+                "'" + connectionData.database + "' AND TABLE_NAME = '" + connectionData.getTableName() + "'") {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                List<SQLColumn> columns = new ArrayList<>();
+                while (rs.next()) {
+                    String colName = rs.getString("COLUMN_NAME");
+                    String dataType = rs.getString("DATA_TYPE");
+                    SQLColumn column = new SQLColumn(colName, dataType);
+                    columns.add(column);
+                }
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(columns));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        viewColumnsQuery.exec();
     }
 
     public static void getColumns(SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {

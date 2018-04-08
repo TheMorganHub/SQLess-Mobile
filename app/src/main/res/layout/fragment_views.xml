@@ -1,13 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.sqless.sqlessmobile.ui.fragments.ViewsFragment">
+    tools:context=".ui.fragments.ViewsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Views fragment" />
+        android:id="@+id/tv_no_views_exist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:text="No hay vistas" />
 
+    <ProgressBar
+        android:id="@+id/progress_bar_views"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:layout_height="wrap_content" />
+
+    <ListView
+        android:id="@+id/lv_views"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </FrameLayout>

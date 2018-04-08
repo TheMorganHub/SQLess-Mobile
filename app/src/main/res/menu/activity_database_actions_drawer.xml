@@ -11,7 +11,7 @@
             android:title="Tablas" />
         <item
             android:id="@+id/nav_views_fragment"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_view"
             android:title="Vistas" />
         <item
             android:id="@+id/nav_functions_fragment"

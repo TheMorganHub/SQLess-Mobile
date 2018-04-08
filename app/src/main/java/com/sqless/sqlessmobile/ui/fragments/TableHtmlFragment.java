@@ -1,14 +1,13 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
-
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLSelectQuery;
+import com.sqless.sqlessmobile.utils.DataTypeUtils;
+import com.sqless.sqlessmobile.utils.HTMLDoc;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.sql.ResultSet;
@@ -17,9 +16,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class TableHtmlFragment extends AbstractFragment {
 
 
@@ -47,45 +43,62 @@ public class TableHtmlFragment extends AbstractFragment {
         wv.getSettings().setBuiltInZoomControls(true);
         wv.getSettings().setDisplayZoomControls(false);
         wv.getSettings().setDefaultTextEncodingName("utf-8");
-        StringBuilder sb = new StringBuilder();
-        sb.append("<HTML><HEAD><LINK href=\"styles.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>");
+
         SQLQuery tableQuery = new SQLSelectQuery(connectionData, sql) {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
-                sb.append("<table>");
-                sb.append("<tr>");
+                HTMLDoc.HTMLDocBuilder builder = new HTMLDoc.HTMLDocBuilder("tablehtml")
+                        .withCss("style");
+
+                builder.addHTML("<table>");
+                builder.addHTML("<thead>");
+                builder.addHTML("<tr>");
+
                 List<String> tableHeaders = getTableHeaders(rs.getMetaData());
-                sb.append("<th>").append("</th>"); //numero de filas
+                builder.addHTML("<th>").addHTML("</th>"); //numero de filas
                 for (String header : tableHeaders) {
-                    sb.append("<th>").append(header).append("</th>");
+                    builder.addHTML("<th>").addHTML(header).addHTML("</th>");
                 }
-                sb.append("</tr>");
-                sb.append("<tbody>");
+                builder.addHTML("</tr>");
+                builder.addHTML("</thead>");
+                builder.addHTML("<tbody>");
 
                 int rowCount = 0;
                 while (rs.next()) {
-                    sb.append("<tr>");
-                    sb.append("<td class=\"row_num\">").append(++rowCount).append("</td>");
+                    builder.addHTML("<tr>");
+                    builder.addHTML("<td>").addHTML(++rowCount).addHTML("</td>");
                     for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                        sb.append("<td>").append(rs.getString(i)).append("</td>");
+                        builder.addHTML(getHTMLForValue(rs.getMetaData().getColumnTypeName(i), rs, i));
                     }
-                    sb.append("</tr>");
+                    builder.addHTML("</tr>");
                 }
-                sb.append("</tbody>");
-                sb.append("</table>");
+                builder.addHTML("</tbody>");
+                builder.addHTML("</table>");
 
-                UIUtils.invokeOnUIThread(() -> {
-                    wv.loadDataWithBaseURL("file:///android_asset/", sb.toString(), "text/html", "utf-8", null);
-                });
+                HTMLDoc doc = builder.build();
+
+                UIUtils.invokeOnUIThread(() -> wv.loadDataWithBaseURL(doc.getAssetsFolder(), doc.getHTML(), "text/html", "utf-8", null));
             }
 
             @Override
             public void onFailure(String errMessage) {
-                Log.e("SQLQuery", errMessage);
+                super.onFailure(errMessage);
             }
         };
         tableQuery.exec();
     }
+
+    public String getHTMLForValue(String columnTypeName, ResultSet rs, int col) throws SQLException {
+        if (rs.getString(col) == null) {
+            return "<td class=\"null-value\">(Null)</td>";
+        }
+        if (columnTypeName.equals("BLOB")) {
+            return "<td>" + DataTypeUtils.parseBlob(rs.getBlob(col)) + "</td>";
+        }
+
+        return "<td>" + rs.getString(col) + "</td>";
+    }
+
 
     public List<String> getTableHeaders(ResultSetMetaData rsmd) throws SQLException {
         List<String> tableHeaders = new ArrayList<>();

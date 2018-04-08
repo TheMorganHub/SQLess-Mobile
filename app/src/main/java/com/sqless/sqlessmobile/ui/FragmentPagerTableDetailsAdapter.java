@@ -14,11 +14,13 @@ import com.sqless.sqlessmobile.ui.fragments.TableHtmlFragment;
 public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
     private Context mContext;
     private final Bundle fragmentBundle;
+    private int tableType;
 
     public FragmentPagerTableDetailsAdapter(Context context, FragmentManager fm, Bundle data) {
         super(fm);
         mContext = context;
         this.fragmentBundle = data;
+        tableType = data.getInt("TABLE_TYPE");
     }
 
     // This determines the fragment for each tab
@@ -29,6 +31,7 @@ public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
         switch (position) {
             case 0:
                 f = AbstractFragment.newInstance(connectionData, ColumnsFragment.class);
+                f.getArguments().putInt("TABLE_TYPE", tableType);
                 break;
             default:
                 f = AbstractFragment.newInstance(connectionData, TableHtmlFragment.class);

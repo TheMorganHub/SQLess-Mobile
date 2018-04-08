@@ -1,3 +1,10 @@
+body {
+	font-family:"Trebuchet MS", "Myriad Pro", Arial, sans-serif;
+	font-size:14px;
+	background:#fefefe;
+	color:#333;
+}
+
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -10,12 +17,18 @@ td, th {
     padding: 8px;
 }
 
-.row_num {
+thead tr {
+    padding: 8px;
+}
+
+tr > td:first-child {
     background-color: white;
     color: #A0A0A0;
     width: 10px;
 }
 
-tr:nth-child(even) {
-    background-color: #dddddd;
+.null-value {
+    background-color: #F7F7F7;
+    color: #969696;
 }
+											

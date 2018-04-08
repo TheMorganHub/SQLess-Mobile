@@ -167,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 case 1:
                     dialog.getValue().dismiss();
                     createConnectionDialog(selectedItem);
-                    //TODO el dialogo que aparece debe tener los datos de la conexión cargada
                     break;
             }
         });

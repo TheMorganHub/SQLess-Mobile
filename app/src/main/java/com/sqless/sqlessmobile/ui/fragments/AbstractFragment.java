@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,12 +30,12 @@ public abstract class AbstractFragment extends Fragment {
         T fragment = null;
         try {
             fragment = clazz.newInstance();
+            Bundle args = new Bundle();
+            args.putSerializable("CONNECTION_DATA", connectionData);
+            fragment.setArguments(args);
         } catch (Exception e) {
-
+            Log.e(AbstractFragment.class.getSimpleName(), "Could not create fragment. Error: " + e.getMessage());
         }
-        Bundle args = new Bundle();
-        args.putSerializable("CONNECTION_DATA", connectionData);
-        fragment.setArguments(args);
         return fragment;
     }
 
