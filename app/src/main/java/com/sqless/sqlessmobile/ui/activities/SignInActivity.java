@@ -65,12 +65,9 @@ public class SignInActivity extends Activity implements View.OnClickListener {
         try {
             final GoogleSignInAccount account = task.getResult(ApiException.class);
 
-            PostRequest request = new PostRequest(getString(R.string.auth_url), new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
-                    finish();
-                }
+            PostRequest request = new PostRequest(getString(R.string.auth_url), response -> {
+                setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
+                finish();
             }, "id_token=" + account.getIdToken());
             queue.add(request);
         } catch (ApiException e) {

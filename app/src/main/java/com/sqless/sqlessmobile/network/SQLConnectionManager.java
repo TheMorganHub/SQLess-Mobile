@@ -27,7 +27,7 @@ public class SQLConnectionManager {
 
     /**
      * Tests a specified activeConnection by attempting to connect to database
-     * "master" in SQLServer using a temporary {@code Connection} object. If
+     * "mysql" in MySQL using a temporary {@code Connection} object. If
      * successful, the {@code Connection} is then promptly closed.
      *
      * @param v
@@ -146,7 +146,7 @@ public class SQLConnectionManager {
         }
 
         public String getNombre() {
-            return username + "@" + database;
+            return username + "@" + host + ":" + port;
         }
 
         @Override
@@ -156,7 +156,7 @@ public class SQLConnectionManager {
 
         @Override
         public String getSubtitulo() {
-            return host + ":" + port;
+            return database;
         }
 
         @Override

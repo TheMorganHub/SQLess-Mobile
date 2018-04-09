@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,10 +37,6 @@ public class UIUtils {
             }
         }
         return index;
-    }
-
-    public static String getTagForFragment(Fragment fragment) {
-        return fragment.getClass().getName();
     }
 
     public static void showInputDialog(Context context, String title, Callback<String> callbackYes) {

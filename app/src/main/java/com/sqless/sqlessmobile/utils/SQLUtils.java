@@ -7,6 +7,10 @@ import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLSelectQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
+import com.sqless.sqlessmobile.sqlobjects.SQLExecutable;
+import com.sqless.sqlessmobile.sqlobjects.SQLFunction;
+import com.sqless.sqlessmobile.sqlobjects.SQLParameter;
+import com.sqless.sqlessmobile.sqlobjects.SQLProcedure;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -221,10 +225,10 @@ public class SQLUtils {
                                 }
                             }
                         }
+                        UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(columns));
                     }
                 };
                 fkQuery.exec();
-                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(columns));
             }
 
             @Override
@@ -233,5 +237,55 @@ public class SQLUtils {
             }
         };
         columnsQuery.exec();
+    }
+
+    public static void getExecutables(SQLConnectionManager.ConnectionData conData, Class<? extends SQLExecutable> className,
+                                      Callback<List<SQLExecutable>> callbackSuccess, Callback<String> callbackFailure) {
+        List<SQLExecutable> executables = new ArrayList<>();
+        SQLQuery getFunctionsQuery = new SQLSelectQuery(conData, "SHOW" + (className == SQLFunction.class ? " FUNCTION " : " PROCEDURE ") + "STATUS WHERE Db = '" + conData.database + "'") {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                while (rs.next()) {
+                    String name = rs.getString("Name");
+                    executables.add(className == SQLFunction.class ? new SQLFunction(name) : new SQLProcedure(name));
+                }
+                if (!executables.isEmpty()) {
+                    SQLQuery getParametersQuery = new SQLSelectQuery(conData, "SELECT SPECIFIC_NAME, PARAMETER_NAME, DATA_TYPE FROM information_schema.parameters\n"
+                            + "WHERE SPECIFIC_SCHEMA = '" + conData.database + "' AND ROUTINE_TYPE = '"
+                            + (className == SQLFunction.class ? "FUNCTION" : "PROCEDURE") + "' AND PARAMETER_NAME IS NOT NULL", false) {
+                        @Override
+                        public void onSuccess(ResultSet rs) throws SQLException {
+                            String previousName = null;
+                            SQLExecutable executable = null;
+                            while (rs.next()) {
+                                String specificName = rs.getString("SPECIFIC_NAME");
+                                if (!specificName.equals(previousName)) {
+                                    for (SQLExecutable e : executables) {
+                                        if (e.getName().equals(specificName)) {
+                                            executable = e;
+                                            break;
+                                        }
+                                    }
+                                }
+                                String paramName = rs.getString("PARAMETER_NAME");
+                                String dataType = rs.getString("DATA_TYPE");
+                                if (executable != null) {
+                                    executable.addParameter(new SQLParameter(paramName, dataType));
+                                }
+                                previousName = specificName;
+                            }
+                        }
+                    };
+                    getParametersQuery.exec();
+                }
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(executables));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        getFunctionsQuery.exec();
     }
 }

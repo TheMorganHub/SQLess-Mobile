@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -11,13 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
-import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.FragmentContainer;
 
 public abstract class AbstractFragment extends Fragment {
-    protected FragmentInteractionListener mListener;
+    protected FragmentContainer mListener;
     protected SQLConnectionManager.ConnectionData connectionData;
     protected View fragmentView;
     protected AlertDialog activeDialog;
+    private Class<? extends AbstractFragment> fragmentClass;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -26,10 +28,11 @@ public abstract class AbstractFragment extends Fragment {
         return fragmentView;
     }
 
-    public static <T extends AbstractFragment> T newInstance(SQLConnectionManager.ConnectionData connectionData, Class<T> clazz) {
-        T fragment = null;
+    public static AbstractFragment newInstance(SQLConnectionManager.ConnectionData connectionData, Class<? extends AbstractFragment> clazz) {
+        AbstractFragment fragment = null;
         try {
             fragment = clazz.newInstance();
+            fragment.setFragmentClass(clazz);
             Bundle args = new Bundle();
             args.putSerializable("CONNECTION_DATA", connectionData);
             fragment.setArguments(args);
@@ -37,6 +40,10 @@ public abstract class AbstractFragment extends Fragment {
             Log.e(AbstractFragment.class.getSimpleName(), "Could not create fragment. Error: " + e.getMessage());
         }
         return fragment;
+    }
+
+    private void setFragmentClass(Class<? extends AbstractFragment> fragmentClass) {
+        this.fragmentClass = fragmentClass;
     }
 
     /**
@@ -67,7 +74,7 @@ public abstract class AbstractFragment extends Fragment {
 
         if (getArguments() != null) {
             connectionData = (SQLConnectionManager.ConnectionData) getArguments().getSerializable("CONNECTION_DATA");
-            mListener.onInteraction(getTitle(), connectionData);
+            mListener.getTitleFromFragment(getTitle());
         }
     }
 
@@ -80,23 +87,34 @@ public abstract class AbstractFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentInteractionListener) {
-            mListener = (FragmentInteractionListener) context;
-            mListener.onInteraction(getTitle(), connectionData);
+        if (context instanceof FragmentContainer) {
+            mListener = (FragmentContainer) context;
+            mListener.getTitleFromFragment(getTitle());
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement FragmentInteractionListener");
+                    + " must implement FragmentContainer");
         }
     }
 
-
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         implementListeners(view.getRootView());
     }
 
     public void onFabClicked() {
+    }
+
+    /**
+     * Retorna un tag que actuará como identificador de este fragment.
+     * Cualquier implementación de este método debe ser determinístico, es decir,
+     * el tag generado por una implementación debe ser el mismo sin importar las veces que se
+     * ejecute el método.
+     *
+     * @return un tag que identificará al fragment.
+     */
+    public String getFragTag() {
+        return fragmentClass.getSimpleName();
     }
 
     protected abstract void implementListeners(View containerView);
@@ -109,5 +127,10 @@ public abstract class AbstractFragment extends Fragment {
             activeDialog.dismiss();
             activeDialog = null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return getTag();
     }
 }

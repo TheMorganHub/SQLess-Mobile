@@ -82,7 +82,6 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
         activeDialog = dialogBuilder.show();
     }
 
-
     @Override
     public void onFabClicked() {
         createNewColumnDialog();

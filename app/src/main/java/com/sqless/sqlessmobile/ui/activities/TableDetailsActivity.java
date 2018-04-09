@@ -7,11 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.sqless.sqlessmobile.R;
-import com.sqless.sqlessmobile.network.SQLConnectionManager;
-import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerTableDetailsAdapter;
 
-public class TableDetailsActivity extends AppCompatActivity implements FragmentInteractionListener {
+public class TableDetailsActivity extends AppCompatActivity implements FragmentContainer {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,7 @@ public class TableDetailsActivity extends AppCompatActivity implements FragmentI
     }
 
     @Override
-    public void onInteraction(String title, SQLConnectionManager.ConnectionData data) {
+    public void getTitleFromFragment(String title) {
         setTitle(title);
     }
 }

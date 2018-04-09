@@ -16,7 +16,7 @@ import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLUpdateQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
-import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerCreateTableAdapter;
 import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
 import com.sqless.sqlessmobile.ui.busevents.createtable.MustGenerateSQLEvent;
@@ -26,7 +26,7 @@ import com.sqless.sqlessmobile.utils.UIUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-public class CreateTableActivity extends AppCompatActivity implements FragmentInteractionListener {
+public class CreateTableActivity extends AppCompatActivity implements FragmentContainer {
 
     private SQLTable newTable;
     EventBus bus = EventBus.getDefault();
@@ -139,7 +139,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentIn
     }
 
     @Override
-    public void onInteraction(String title, SQLConnectionManager.ConnectionData data) {
+    public void getTitleFromFragment(String title) {
         setTitle(title);
     }
 

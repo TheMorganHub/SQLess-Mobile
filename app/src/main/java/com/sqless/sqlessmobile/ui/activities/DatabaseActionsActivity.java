@@ -9,20 +9,21 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
-import com.sqless.sqlessmobile.ui.FragmentInteractionListener;
+import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.fragments.AbstractFragment;
+import com.sqless.sqlessmobile.ui.fragments.ExecutablesFragment;
 import com.sqless.sqlessmobile.ui.fragments.TablesFragment;
 import com.sqless.sqlessmobile.ui.fragments.ViewsFragment;
-import com.sqless.sqlessmobile.utils.UIUtils;
 
 public class DatabaseActionsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FragmentContainer {
 
     private SQLConnectionManager.ConnectionData connectionData;
 
@@ -52,8 +53,8 @@ public class DatabaseActionsActivity extends AppCompatActivity
             Fragment defaultFragment = getSupportFragmentManager().findFragmentByTag("TablesFragment");
             if (defaultFragment == null) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                Fragment tablesFragment = AbstractFragment.newInstance(connectionData, TablesFragment.class);
-                fragmentManager.beginTransaction().replace(R.id.content_database_actions, tablesFragment, UIUtils.getTagForFragment(tablesFragment)).commit();
+                AbstractFragment tablesFragment = AbstractFragment.newInstance(connectionData, TablesFragment.class);
+                fragmentManager.beginTransaction().replace(R.id.content_database_actions, tablesFragment, tablesFragment.getFragTag()).commit();
             }
         }
     }
@@ -71,7 +72,7 @@ public class DatabaseActionsActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        Fragment fragment = null;
+        AbstractFragment fragment = null;
 
         int id = item.getItemId();
 
@@ -80,9 +81,11 @@ public class DatabaseActionsActivity extends AppCompatActivity
         } else if (id == R.id.nav_views_fragment) {
             fragment = AbstractFragment.newInstance(connectionData, ViewsFragment.class);
         } else if (id == R.id.nav_functions_fragment) {
-
+            fragment = AbstractFragment.newInstance(connectionData, ExecutablesFragment.class);
+            fragment.getArguments().putInt("EXECUTABLE_TYPE", ExecutablesFragment.FUNCTION);
         } else if (id == R.id.nav_procedures_fragment) {
-
+            fragment = AbstractFragment.newInstance(connectionData, ExecutablesFragment.class);
+            fragment.getArguments().putInt("EXECUTABLE_TYPE", ExecutablesFragment.PROCEDURE);
         }
         openFragment(fragment);
 
@@ -92,18 +95,20 @@ public class DatabaseActionsActivity extends AppCompatActivity
         return true;
     }
 
-    public void openFragment(Fragment newFragment) {
+    public void openFragment(AbstractFragment newFragment) {
         if (newFragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            Fragment fragByTag = fragmentManager.findFragmentByTag(UIUtils.getTagForFragment(newFragment));
+            AbstractFragment fragByTag = (AbstractFragment) fragmentManager.findFragmentByTag(newFragment.getFragTag());
+
             if (fragByTag == null) { //el fragment no existe
-                fragmentManager.beginTransaction().replace(R.id.content_database_actions, newFragment, UIUtils.getTagForFragment(newFragment)).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_database_actions, newFragment, newFragment.getFragTag()).commit();
+                Log.i(getClass().getSimpleName(), newFragment.getFragTag());
             }
         }
     }
 
     @Override
-    public void onInteraction(String title, SQLConnectionManager.ConnectionData data) {
+    public void getTitleFromFragment(String title) {
         setTitle(title);
     }
 }

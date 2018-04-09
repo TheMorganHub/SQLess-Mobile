@@ -18,8 +18,10 @@ import java.util.List;
 
 public class ViewsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
-    private List<String> viewsNames;
     private ListViewImageAdapter<String> viewsAdapter;
+    private List<String> viewNames;
+    private ProgressBar progressBar;
+    private ListView lv_views;
 
 
     public ViewsFragment() {
@@ -39,22 +41,25 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
 
     @Override
     public void afterCreate() {
-        ListView lv_views = fragmentView.findViewById(R.id.lv_views);
+        progressBar = fragmentView.findViewById(R.id.progress_bar_views);
+        lv_views = fragmentView.findViewById(R.id.lv_views);
         lv_views.setOnItemLongClickListener(this);
         lv_views.setOnItemClickListener(this);
-        ProgressBar progressBar = fragmentView.findViewById(R.id.progress_bar_views);
+
         if (viewsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getViewNames(connectionData, names -> {
-                viewsNames = names;
-                viewsAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_view), viewsNames);
-                lv_views.setAdapter(viewsAdapter);
-                progressBar.setVisibility(View.GONE);
-                fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(viewsNames != null && !viewsNames.isEmpty() ? View.GONE : View.VISIBLE);
-            }, err -> progressBar.setVisibility(View.GONE));
+            SQLUtils.getViewNames(connectionData, this::onViewsLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_views.setAdapter(viewsAdapter);
         }
+    }
+
+    public void onViewsLoaded(List<String> viewNames) {
+        this.viewNames = viewNames;
+        viewsAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_view), viewNames);
+        lv_views.setAdapter(viewsAdapter);
+        progressBar.setVisibility(View.GONE);
+        fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(viewNames != null && !viewNames.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -64,7 +69,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
         actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
             switch (clickedItem) {
                 case 0:
-                    deleteView(viewsNames.get(i));
+                    deleteView(viewNames.get(i));
                     break;
             }
         });
@@ -75,14 +80,14 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Intent intent = new Intent(getContext(), TableDetailsActivity.class);
-        connectionData.setTableName(viewsNames.get(i));
+        connectionData.setTableName(viewNames.get(i));
         intent.putExtra("CONNECTION_DATA", connectionData);
         intent.putExtra("TABLE_TYPE", ColumnsFragment.VIEW);
         startActivity(intent);
     }
 
     public void deleteView(String name) {
-        //TODO delete table
+        //TODO delete view
     }
 
     @Override

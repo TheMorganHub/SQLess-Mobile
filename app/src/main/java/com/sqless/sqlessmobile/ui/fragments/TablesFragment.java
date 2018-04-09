@@ -22,6 +22,8 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     private List<String> tableNames;
     private ListViewImageAdapter<String> tablesAdapter;
+    private ListView lv_tables;
+    private ProgressBar progressBar;
 
     private static final int TABLE_CREATION_RESULT = 341;
 
@@ -40,21 +42,25 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     @Override
     public void afterCreate() {
-        ListView lv_tables = fragmentView.findViewById(R.id.lv_tables);
+        lv_tables = fragmentView.findViewById(R.id.lv_tables);
         lv_tables.setOnItemClickListener(this);
         lv_tables.setOnItemLongClickListener(this);
-        ProgressBar progressBar = fragmentView.findViewById(R.id.progress_bar_tables);
+        progressBar = fragmentView.findViewById(R.id.progress_bar_tables);
+
         if (tablesAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getTableNames(connectionData, names -> {
-                tableNames = names;
-                tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tableNames);
-                lv_tables.setAdapter(tablesAdapter);
-                progressBar.setVisibility(View.GONE);
-            }, err -> progressBar.setVisibility(View.GONE));
+            SQLUtils.getTableNames(connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_tables.setAdapter(tablesAdapter);
         }
+    }
+
+    public void onTablesLoaded(List<String> tableNames) {
+        this.tableNames = tableNames;
+        tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tableNames);
+        lv_tables.setAdapter(tablesAdapter);
+        progressBar.setVisibility(View.GONE);
+        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tableNames != null && !tableNames.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     @Override
