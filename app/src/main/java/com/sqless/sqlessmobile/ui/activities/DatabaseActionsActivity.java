@@ -102,7 +102,6 @@ public class DatabaseActionsActivity extends AppCompatActivity
 
             if (fragByTag == null) { //el fragment no existe
                 fragmentManager.beginTransaction().replace(R.id.content_database_actions, newFragment, newFragment.getFragTag()).commit();
-                Log.i(getClass().getSimpleName(), newFragment.getFragTag());
             }
         }
     }

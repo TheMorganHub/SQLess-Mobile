@@ -1,6 +1,9 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -9,6 +12,7 @@ import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.Callback;
+import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;
@@ -22,9 +26,10 @@ import java.util.List;
  * Esta diferencia es necesaria ya que en el caso de columnas de tablas, es necesario traer PK y FK.
  * En Views solo necesitamos los nombres.
  */
-public class ColumnsFragment extends AbstractFragment {
+public class ColumnsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener {
 
     private ListViewImageAdapter<SQLColumn> columnsAdapter;
+    private List<SQLColumn> columns;
     private ListView lv_columnas;
     private ProgressBar progressBar;
     public static final int TABLE = 632;
@@ -39,6 +44,7 @@ public class ColumnsFragment extends AbstractFragment {
         final int tableType = getArguments().getInt("TABLE_TYPE", -1);
 
         lv_columnas = fragmentView.findViewById(R.id.lv_columnas);
+        lv_columnas.setOnItemLongClickListener(this);
         progressBar = fragmentView.findViewById(R.id.column_progress_bar);
         if (columnsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
@@ -57,6 +63,7 @@ public class ColumnsFragment extends AbstractFragment {
     }
 
     public void onColumnsLoaded(List<SQLColumn> columns) {
+        this.columns = columns;
         columnsAdapter = new ListViewImageAdapter<>(getContext(), columns);
         lv_columnas.setAdapter(columnsAdapter);
         progressBar.setVisibility(View.GONE);
@@ -77,4 +84,29 @@ public class ColumnsFragment extends AbstractFragment {
         return R.layout.fragment_columns;
     }
 
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        if (getArguments().getInt("TABLE_TYPE", -1) != VIEW) {
+            FinalValue<AlertDialog> dialog = new FinalValue<>();
+            AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
+            actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
+                switch (clickedItem) {
+                    case 0:
+                        deleteColumn(columns.get(position));
+                        break;
+                }
+            });
+            dialog.set(actionDialog.show());
+            return true;
+        }
+        return false;
+    }
+
+    public void deleteColumn(SQLColumn column) {
+        SQLUtils.dropEntity(connectionData, column, nullobj -> {
+            columns.remove(column);
+            columnsAdapter.notifyDataSetChanged();
+            fragmentView.findViewById(R.id.tv_no_columns_exist).setVisibility(columns != null && !columns.isEmpty() ? View.GONE : View.VISIBLE);
+        }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar columna"));
+    }
 }

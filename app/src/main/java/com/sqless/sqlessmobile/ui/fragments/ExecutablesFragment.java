@@ -1,7 +1,10 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
 
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -11,13 +14,15 @@ import com.sqless.sqlessmobile.sqlobjects.SQLExecutable;
 import com.sqless.sqlessmobile.sqlobjects.SQLFunction;
 import com.sqless.sqlessmobile.sqlobjects.SQLProcedure;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
+import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;
 
-public class ExecutablesFragment extends AbstractFragment {
+public class ExecutablesFragment extends AbstractFragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
     private ListView lvExecutables;
+    private List<SQLExecutable> executables;
     private ProgressBar progressBar;
     private int executableType;
     private ListViewImageAdapter<SQLExecutable> executablesAdapter;
@@ -42,6 +47,8 @@ public class ExecutablesFragment extends AbstractFragment {
     @Override
     public void afterCreate() {
         lvExecutables = fragmentView.findViewById(R.id.lv_executables);
+        lvExecutables.setOnItemLongClickListener(this);
+        lvExecutables.setOnItemClickListener(this);
         progressBar = fragmentView.findViewById(R.id.progress_bar_executables);
         if (executablesAdapter == null) {
             progressBar.setVisibility(View.VISIBLE);
@@ -62,6 +69,7 @@ public class ExecutablesFragment extends AbstractFragment {
     }
 
     public void onExecutablesLoaded(List<SQLExecutable> executables) {
+        this.executables = executables;
         executablesAdapter = new ListViewImageAdapter<>(getContext(),
                 getResources().getDrawable(executableType == FUNCTION ? R.drawable.ic_functions_black_24dp : R.drawable.ic_procedures_black_24dp), executables);
         lvExecutables.setAdapter(executablesAdapter);
@@ -74,5 +82,33 @@ public class ExecutablesFragment extends AbstractFragment {
     @Override
     protected void implementListeners(View containerView) {
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //TODO EXECUTE CALLABLE
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        FinalValue<AlertDialog> dialog = new FinalValue<>();
+        AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
+        actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
+            switch (clickedItem) {
+                case 0:
+                    deleteExecutable(executables.get(position));
+                    break;
+            }
+        });
+        dialog.set(actionDialog.show());
+        return true;
+    }
+
+    public void deleteExecutable(SQLExecutable executable) {
+        SQLUtils.dropEntity(connectionData, executable, nullobj -> {
+            executables.remove(executable);
+            executablesAdapter.notifyDataSetChanged();
+            fragmentView.findViewById(R.id.tv_no_executables_exist).setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+        }, err -> Log.e(getClass().getSimpleName(), "No se pudo eliminar el ejecutable"));
     }
 }

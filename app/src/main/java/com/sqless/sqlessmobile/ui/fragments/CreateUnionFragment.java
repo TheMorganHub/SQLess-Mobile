@@ -15,6 +15,7 @@ import android.widget.Spinner;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.sqlobjects.SQLForeignKey;
+import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
 import com.sqless.sqlessmobile.utils.SQLUtils;
@@ -32,7 +33,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
     EventBus bus = EventBus.getDefault();
     private List<SQLColumn> columns;
     private ArrayAdapter<SQLColumn> spinnerFkColumnAdapter;
-    private ArrayAdapter<String> spinnerRefTableAdapter;
+    private ArrayAdapter<SQLTable> spinnerRefTableAdapter;
     private ArrayAdapter<String> spinnerRefColumnAdapter;
 
 
@@ -88,7 +89,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
 
         ProgressBar progressBar = viewInflated.findViewById(R.id.progress_ref_table);
         progressBar.setVisibility(View.VISIBLE);
-        SQLUtils.getTableNames(connectionData, names -> {
+        SQLUtils.getTables(connectionData, names -> {
             if (activeDialog != null && activeDialog.isShowing()) {
                 spinnerRefTableAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, names);
                 tablesSpinner.setAdapter(spinnerRefTableAdapter);
@@ -142,7 +143,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
         View dialogInflatedView = view.getRootView();
         ProgressBar progressBar = dialogInflatedView.findViewById(R.id.progress_ref_column);
         progressBar.setVisibility(View.VISIBLE);
-        String tableNameSelected = spinnerRefTableAdapter.getItem(i);
+        String tableNameSelected = spinnerRefTableAdapter.getItem(i).getName();
         Spinner refColumnsSpinner = dialogInflatedView.findViewById(R.id.sp_fk_ref_col);
         SQLUtils.getColumnNamesInTable(connectionData, tableNameSelected, names -> {
             if (activeDialog != null && activeDialog.isShowing()) {

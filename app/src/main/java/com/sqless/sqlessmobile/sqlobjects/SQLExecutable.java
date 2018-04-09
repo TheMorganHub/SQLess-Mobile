@@ -3,7 +3,7 @@ package com.sqless.sqlessmobile.sqlobjects;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class SQLExecutable extends SQLObject implements SQLCallable {
+public abstract class SQLExecutable extends SQLObject implements SQLCallable, SQLDroppable {
     
     protected List<SQLParameter> parameters;
 

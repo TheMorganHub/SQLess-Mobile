@@ -3,6 +3,7 @@ package com.sqless.sqlessmobile.ui.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -20,8 +21,8 @@ import java.util.List;
 
 public class TablesFragment extends AbstractFragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
-    private List<String> tableNames;
-    private ListViewImageAdapter<String> tablesAdapter;
+    private List<SQLTable> tables;
+    private ListViewImageAdapter<SQLTable> tablesAdapter;
     private ListView lv_tables;
     private ProgressBar progressBar;
 
@@ -49,18 +50,18 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
         if (tablesAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getTableNames(connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
+            SQLUtils.getTables(connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_tables.setAdapter(tablesAdapter);
         }
     }
 
-    public void onTablesLoaded(List<String> tableNames) {
-        this.tableNames = tableNames;
-        tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tableNames);
+    public void onTablesLoaded(List<SQLTable> tables) {
+        this.tables = tables;
+        tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tables);
         lv_tables.setAdapter(tablesAdapter);
         progressBar.setVisibility(View.GONE);
-        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tableNames != null && !tableNames.isEmpty() ? View.GONE : View.VISIBLE);
+        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
             switch (clickedItem) {
                 case 0:
-                    deleteTable(tableNames.get(i));
+                    deleteTable(tables.get(i));
                     break;
             }
         });
@@ -89,8 +90,12 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         return true;
     }
 
-    public void deleteTable(String name) {
-        //TODO delete table
+    public void deleteTable(SQLTable table) {
+        SQLUtils.dropEntity(connectionData, table, nullobj -> {
+            tables.remove(table);
+            tablesAdapter.notifyDataSetChanged();
+            fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
+        }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar tabla"));
     }
 
     @Override
@@ -99,8 +104,9 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
             case TABLE_CREATION_RESULT:
                 if (resultCode == Activity.RESULT_OK) {
                     SQLTable newTable = (SQLTable) data.getSerializableExtra("NEW_TABLE");
-                    tableNames.add(newTable.getName());
+                    tables.add(newTable);
                     tablesAdapter.notifyDataSetChanged();
+                    fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
                 }
                 break;
         }
@@ -115,7 +121,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Intent intent = new Intent(getContext(), TableDetailsActivity.class);
-        connectionData.setTableName(tableNames.get(i));
+        connectionData.setTableName(tables.get(i).getName());
         intent.putExtra("CONNECTION_DATA", connectionData);
         intent.putExtra("TABLE_TYPE", ColumnsFragment.TABLE);
         startActivity(intent);

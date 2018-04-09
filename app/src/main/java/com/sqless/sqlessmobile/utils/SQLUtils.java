@@ -5,12 +5,16 @@ import android.util.Log;
 
 import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLSelectQuery;
+import com.sqless.sqlessmobile.db.queries.SQLUpdateQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
+import com.sqless.sqlessmobile.sqlobjects.SQLDroppable;
 import com.sqless.sqlessmobile.sqlobjects.SQLExecutable;
 import com.sqless.sqlessmobile.sqlobjects.SQLFunction;
 import com.sqless.sqlessmobile.sqlobjects.SQLParameter;
 import com.sqless.sqlessmobile.sqlobjects.SQLProcedure;
+import com.sqless.sqlessmobile.sqlobjects.SQLTable;
+import com.sqless.sqlessmobile.sqlobjects.SQLView;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -112,13 +116,13 @@ public class SQLUtils {
         nameQuery.exec();
     }
 
-    public static void getTableNames(SQLConnectionManager.ConnectionData connectionData, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+    public static void getTables(SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLTable>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery tablesQuery = new SQLSelectQuery(connectionData, "show full tables where Table_Type = 'BASE TABLE' OR Table_Type = 'SYSTEM VIEW'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
-                List<String> tableNames = new ArrayList<>();
+                List<SQLTable> tableNames = new ArrayList<>();
                 while (rs.next()) {
-                    tableNames.add(rs.getString(1));
+                    tableNames.add(new SQLTable(rs.getString(1)));
                 }
                 UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(tableNames));
             }
@@ -131,15 +135,15 @@ public class SQLUtils {
         tablesQuery.exec();
     }
 
-    public static void getViewNames(SQLConnectionManager.ConnectionData connectionData, Callback<List<String>> callbackSuccess, Callback<String> callbackFailure) {
+    public static void getViews(SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLView>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery viewsQuery = new SQLSelectQuery(connectionData, "SHOW FULL TABLES IN " + connectionData.database + " WHERE TABLE_TYPE LIKE 'VIEW'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
-                List<String> viewNames = new ArrayList<>();
+                List<SQLView> views = new ArrayList<>();
                 while (rs.next()) {
-                    viewNames.add(rs.getString(1));
+                    views.add(new SQLView(rs.getString(1)));
                 }
-                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(viewNames));
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(views));
             }
 
             @Override
@@ -178,7 +182,7 @@ public class SQLUtils {
                 while (rs.next()) {
                     String colName = rs.getString("COLUMN_NAME");
                     String dataType = rs.getString("DATA_TYPE");
-                    SQLColumn column = new SQLColumn(colName, dataType);
+                    SQLColumn column = new SQLColumn(connectionData.getTableName(), colName, dataType);
                     columns.add(column);
                 }
                 UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(columns));
@@ -202,7 +206,7 @@ public class SQLUtils {
                 while (rs.next()) {
                     String colName = rs.getString("COLUMN_NAME");
                     String dataType = rs.getString("DATA_TYPE");
-                    SQLColumn column = new SQLColumn(colName, dataType);
+                    SQLColumn column = new SQLColumn(connectionData.getTableName(), colName, dataType);
                     column.setIsPK(rs.getString("COLUMN_KEY").equals("PRI"));
                     columns.add(column);
                 }
@@ -287,5 +291,20 @@ public class SQLUtils {
             }
         };
         getFunctionsQuery.exec();
+    }
+
+    public static void dropEntity(SQLConnectionManager.ConnectionData connData, SQLDroppable droppable, Callback callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery dropQuery = new SQLUpdateQuery(connData, droppable.getDropStatement()) {
+            @Override
+            public void onSuccess(int updateCount) {
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(null));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        dropQuery.exec();
     }
 }

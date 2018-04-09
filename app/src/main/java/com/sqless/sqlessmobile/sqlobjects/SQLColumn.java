@@ -3,20 +3,22 @@ package com.sqless.sqlessmobile.sqlobjects;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.Iconable;
 
-public class SQLColumn extends SQLObject implements Iconable {
+public class SQLColumn extends SQLObject implements Iconable, SQLDroppable {
 
+    private String parentName;
     private String datatype;
     private boolean isPK;
     private boolean isFK;
     private boolean nullable;
 
-    public SQLColumn(String nombre, String datatype) {
+    public SQLColumn(String parentName, String nombre, String datatype) {
         super(nombre);
+        this.parentName = parentName;
         this.datatype = datatype;
     }
 
-    public SQLColumn(String nombre, String datatype, boolean isPK, boolean nullable) {
-        this(nombre, datatype);
+    public SQLColumn(String parentName, String nombre, String datatype, boolean isPK, boolean nullable) {
+        this(parentName, nombre, datatype);
         this.isPK = isPK;
         this.nullable = nullable;
     }
@@ -67,5 +69,10 @@ public class SQLColumn extends SQLObject implements Iconable {
     @Override
     public String toString() {
         return getName() + " (" + datatype + ")";
+    }
+
+    @Override
+    public String getDropStatement() {
+        return "ALTER TABLE " + parentName + " DROP COLUMN `" + getName() + "`";
     }
 }
