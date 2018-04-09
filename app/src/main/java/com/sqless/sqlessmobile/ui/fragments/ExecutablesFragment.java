@@ -28,6 +28,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     private ListViewImageAdapter<SQLExecutable> executablesAdapter;
     public static final int FUNCTION = 575;
     public static final int PROCEDURE = 166;
+    private TextView tvNoExecutables;
 
     public ExecutablesFragment() {
         // Required empty public constructor
@@ -47,10 +48,13 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     @Override
     public void afterCreate() {
         lvExecutables = fragmentView.findViewById(R.id.lv_executables);
-        lvExecutables.setOnItemLongClickListener(this);
-        lvExecutables.setOnItemClickListener(this);
         progressBar = fragmentView.findViewById(R.id.progress_bar_executables);
+        tvNoExecutables = fragmentView.findViewById(R.id.tv_no_executables_exist);
+        tvNoExecutables.setText("No hay " + (executableType == FUNCTION ? "funciones" : "procedures"));
+
         if (executablesAdapter == null) {
+            lvExecutables.setOnItemLongClickListener(this);
+            lvExecutables.setOnItemClickListener(this);
             progressBar.setVisibility(View.VISIBLE);
             switch (executableType) {
                 case FUNCTION:
@@ -60,6 +64,9 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
                     SQLUtils.getExecutables(connectionData, SQLProcedure.class, this::onExecutablesLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
             }
+        } else {
+            lvExecutables.setAdapter(executablesAdapter);
+            tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -74,8 +81,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
                 getResources().getDrawable(executableType == FUNCTION ? R.drawable.ic_functions_black_24dp : R.drawable.ic_procedures_black_24dp), executables);
         lvExecutables.setAdapter(executablesAdapter);
         progressBar.setVisibility(View.GONE);
-        TextView tvNoExecutables = fragmentView.findViewById(R.id.tv_no_executables_exist);
-        tvNoExecutables.setText("No hay " + (executableType == FUNCTION ? "funciones" : "procedures"));
+
         tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
     }
 

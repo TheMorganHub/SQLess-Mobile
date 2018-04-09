@@ -45,14 +45,15 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     public void afterCreate() {
         progressBar = fragmentView.findViewById(R.id.progress_bar_views);
         lv_views = fragmentView.findViewById(R.id.lv_views);
-        lv_views.setOnItemLongClickListener(this);
-        lv_views.setOnItemClickListener(this);
 
         if (viewsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
+            lv_views.setOnItemLongClickListener(this);
+            lv_views.setOnItemClickListener(this);
             SQLUtils.getViews(connectionData, this::onViewsLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_views.setAdapter(viewsAdapter);
+            fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
         }
     }
 
