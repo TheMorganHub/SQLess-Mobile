@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ProgressBar;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
+import com.sqless.sqlessmobile.ui.activities.QueryResultActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.FinalValue;
@@ -26,7 +28,7 @@ import java.util.List;
  * Esta diferencia es necesaria ya que en el caso de columnas de tablas, es necesario traer PK y FK.
  * En Views solo necesitamos los nombres.
  */
-public class ColumnsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener {
+public class ColumnsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     private ListViewImageAdapter<SQLColumn> columnsAdapter;
     private List<SQLColumn> columns;
@@ -45,6 +47,7 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
         lv_columnas = fragmentView.findViewById(R.id.lv_columnas);
         lv_columnas.setOnItemLongClickListener(this);
+        lv_columnas.setOnItemClickListener(this);
         progressBar = fragmentView.findViewById(R.id.column_progress_bar);
         if (columnsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
@@ -108,5 +111,15 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
             columnsAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_columns_exist).setVisibility(columns != null && !columns.isEmpty() ? View.GONE : View.VISIBLE);
         }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar columna"));
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        SQLColumn column = columns.get(position);
+        Intent intent = new Intent(getContext(), QueryResultActivity.class);
+        intent.putExtra("CONNECTION_DATA", connectionData);
+        intent.putExtra("QUERY_TITLE", column.getParentName() + "." + column.getName());
+        intent.putExtra("QUERY", column.getSelectStatement());
+        startActivity(intent);
     }
 }

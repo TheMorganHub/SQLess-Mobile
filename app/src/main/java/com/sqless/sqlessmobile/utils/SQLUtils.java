@@ -17,6 +17,7 @@ import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.sqlobjects.SQLView;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -306,5 +307,70 @@ public class SQLUtils {
             }
         };
         dropQuery.exec();
+    }
+
+    public static void createHTMLFromQueryResult(SQLConnectionManager.ConnectionData connData, String sql, Callback<HTMLDoc> callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery tableQuery = new SQLSelectQuery(connData, sql) {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                HTMLDoc.HTMLDocBuilder builder = new HTMLDoc.HTMLDocBuilder("tablehtml")
+                        .withCss("style");
+
+                builder.addHTML("<table>");
+                builder.addHTML("<thead>");
+                builder.addHTML("<tr>");
+
+                List<String> tableHeaders = getTableHeaders(rs.getMetaData());
+                builder.addHTML("<th>").addHTML("</th>"); //numero de filas
+                for (String header : tableHeaders) {
+                    builder.addHTML("<th>").addHTML(header).addHTML("</th>");
+                }
+                builder.addHTML("</tr>");
+                builder.addHTML("</thead>");
+                builder.addHTML("<tbody>");
+
+                int rowCount = 0;
+                while (rs.next()) {
+                    builder.addHTML("<tr>");
+                    builder.addHTML("<td>").addHTML(++rowCount).addHTML("</td>");
+                    for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                        builder.addHTML(getHTMLForValue(rs.getMetaData().getColumnTypeName(i), rs, i));
+                    }
+                    builder.addHTML("</tr>");
+                }
+                builder.addHTML("</tbody>");
+                builder.addHTML("</table>");
+
+                HTMLDoc doc = builder.build();
+
+                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(doc));
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        tableQuery.exec();
+    }
+
+    private static String getHTMLForValue(String columnTypeName, ResultSet rs, int col) throws SQLException {
+        if (rs.getString(col) == null) {
+            return "<td class=\"null-value\">(Null)</td>";
+        }
+        if (columnTypeName.equals("BLOB")) {
+            return "<td>" + DataTypeUtils.parseBlob(rs.getBlob(col)) + "</td>";
+        }
+
+        return "<td>" + rs.getString(col) + "</td>";
+    }
+
+
+    private static List<String> getTableHeaders(ResultSetMetaData rsmd) throws SQLException {
+        List<String> tableHeaders = new ArrayList<>();
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            tableHeaders.add(rsmd.getColumnName(i));
+        }
+        return tableHeaders;
     }
 }

@@ -3,7 +3,7 @@ package com.sqless.sqlessmobile.sqlobjects;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.Iconable;
 
-public class SQLColumn extends SQLObject implements Iconable, SQLDroppable {
+public class SQLColumn extends SQLObject implements Iconable, SQLDroppable, SQLSelectable {
 
     private String parentName;
     private String datatype;
@@ -35,6 +35,10 @@ public class SQLColumn extends SQLObject implements Iconable, SQLDroppable {
                 return "decimal(10,2)";
         }
         return getDatatype();
+    }
+
+    public String getParentName() {
+        return parentName;
     }
 
     public void setIsPK(boolean flag) {
@@ -74,5 +78,10 @@ public class SQLColumn extends SQLObject implements Iconable, SQLDroppable {
     @Override
     public String getDropStatement() {
         return "ALTER TABLE " + parentName + " DROP COLUMN `" + getName() + "`";
+    }
+
+    @Override
+    public String getSelectStatement() {
+        return "SELECT `" + getName() + "` FROM `" + parentName + "` LIMIT 200";
     }
 }

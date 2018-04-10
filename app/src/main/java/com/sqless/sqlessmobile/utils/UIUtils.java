@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
 public class UIUtils {
 
@@ -51,4 +52,5 @@ public class UIUtils {
         builder.setView(viewInflated);
         builder.show();
     }
+
 }

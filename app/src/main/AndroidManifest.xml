@@ -35,6 +35,7 @@
         <activity
             android:name=".ui.activities.CreateTableActivity"
             android:label="@string/title_activity_create_table" />
+        <activity android:name=".ui.activities.QueryResultActivity"></activity>
     </application>
 
 </manifest>

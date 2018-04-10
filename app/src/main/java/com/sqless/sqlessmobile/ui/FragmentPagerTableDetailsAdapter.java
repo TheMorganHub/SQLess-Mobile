@@ -35,6 +35,8 @@ public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
                 break;
             default:
                 f = AbstractFragment.newInstance(connectionData, TableHtmlFragment.class);
+                f.getArguments().putString("QUERY_TITLE", connectionData != null ? connectionData.getTableName() : "");
+                f.getArguments().putString("QUERY", connectionData != null ? "SELECT * FROM " + connectionData.getTableName() + " LIMIT 200" : null);
                 break;
         }
         return f;
