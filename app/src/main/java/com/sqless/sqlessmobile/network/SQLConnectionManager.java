@@ -13,6 +13,7 @@ import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.io.Serializable;
+import java.nio.BufferUnderflowException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -55,10 +56,10 @@ public class SQLConnectionManager {
                     v.findViewById(R.id.spinner_dbs).setVisibility(View.VISIBLE);
                 });
                 v.post(() -> callbackSuccess.exec(lastSuccessful));
-            } catch (SQLException e) {
-                Log.e("SQLConnectionManager", "Test failed");
-                Log.e("SQLConnectionManager", e.getMessage());
-                v.post(() -> callbackFailure.exec(e.getMessage()));
+            } catch (SQLException | BufferUnderflowException e) {
+                String exMessage = e.getMessage() != null ? e.getMessage() : "Ocurrió un error inesperado al testear la conexión. ¿Quizá la cuenta no existe?";
+                Log.e("SQLConnectionManager", "Test failed: " + exMessage);
+                v.post(() -> callbackFailure.exec(exMessage));
             } finally {
                 v.post(() -> {
                     if (layProgress != null && layInner != null) {
