@@ -1,15 +1,15 @@
 package com.sqless.sqlessmobile.ui.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -19,12 +19,16 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.PostRequest;
+import com.sqless.sqlessmobile.network.RestRequest;
+import com.sqless.sqlessmobile.utils.UIUtils;
+
+import us.monoid.json.JSONObject;
+import us.monoid.web.Resty;
 
 public class SignInActivity extends Activity implements View.OnClickListener {
 
     private GoogleSignInClient mGoogleSignInClient;
     private static final int RC_SIGN_IN = 9001;
-    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +44,6 @@ public class SignInActivity extends Activity implements View.OnClickListener {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        queue = Volley.newRequestQueue(this);
     }
 
     public void signIn() {
@@ -63,13 +66,39 @@ public class SignInActivity extends Activity implements View.OnClickListener {
 
     public void handleSignInResult(Task<GoogleSignInAccount> task) {
         try {
-            final GoogleSignInAccount account = task.getResult(ApiException.class);
+            ProgressBar signInProgressBar = findViewById(R.id.sign_in_progressbar);
+            signInProgressBar.setVisibility(View.VISIBLE);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+                    .setTitle("Error")
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
 
-            PostRequest request = new PostRequest(getString(R.string.auth_url), response -> {
-                setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
-                finish();
-            }, "id_token=" + account.getIdToken());
-            queue.add(request);
+            final GoogleSignInAccount account = task.getResult(ApiException.class);
+            RestRequest request = new PostRequest(getString(R.string.auth_url), Resty.form(Resty.data("id_token", account.getIdToken()),
+                    Resty.data("source", "MOBILE"))) {
+                @Override
+                public void onSuccess(JSONObject json) throws Exception {
+                    //si la autenticación con el backend fue exitosa, el json va a contener token_info. Si no fue exitosa, esto va a tirar una exception e ir a onFailure()
+                    json.get("token_info");
+                    setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
+                    finish();
+                }
+
+                @Override
+                public void onFailure(String message) {
+                    mGoogleSignInClient.signOut();
+                    UIUtils.invokeOnUIThread(() -> {
+                        signInProgressBar.setVisibility(View.INVISIBLE);
+                        String errMessage = "Hubo un error al procesar la autenticación con Google.";
+                        if (message.equals("connect timed out")) {
+                            errMessage = "No se pudo crear la conexión con el servidor de SQLess. Disculpa las molestias.";
+                        }
+                        builder.setMessage(errMessage);
+                        builder.show();
+                        Log.e("SignInActivity", message);
+                    });
+                }
+            };
+            request.exec();
         } catch (ApiException e) {
             Log.w("ERR", "status code: " + e.getStatusCode());
         }
