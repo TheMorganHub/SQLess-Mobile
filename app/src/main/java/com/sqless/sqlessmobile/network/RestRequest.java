@@ -10,8 +10,6 @@ public abstract class RestRequest {
 
     protected String url;
     protected Resty rest;
-    public static final String AUTH_URL = "http://sqless.ddns.net:8080/ws/auth_google";
-    public static final String MAPLE_URL = "http://sqless.ddns.net:8080/ws/maple";
     protected boolean newThread = true;
 
     public RestRequest(String url) {
