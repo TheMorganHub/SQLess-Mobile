@@ -29,6 +29,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.HelperDB;
+import com.sqless.sqlessmobile.network.GoogleTokenManager;
 import com.sqless.sqlessmobile.network.PostRequest;
 import com.sqless.sqlessmobile.network.RestRequest;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
@@ -42,7 +43,7 @@ import us.monoid.web.Resty;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
-    public static final int ACC_SIGN_IN = 6969;
+
     private AlertDialog activeDialog;
     private List<SQLConnectionManager.ConnectionData> connectionDataList;
     private ListViewSubtituladoAdapter<SQLConnectionManager.ConnectionData> adapter;
@@ -75,19 +76,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void signInSilently() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(getString(R.string.google_client_id))
-                .requestEmail()
-                .build();
-        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        mGoogleSignInClient.silentSignIn()
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Log.i("MainActivity", "Silent sign in with id token " + task.getResult().getIdToken());
-                    } else {
-                        Intent intent = new Intent(this, SignInActivity.class);
-                        startActivityForResult(intent, ACC_SIGN_IN);
-                    }
-                });
+        GoogleTokenManager.getInstance().silentSignIn(this, account -> Log.i("MainActivity", "Silent sign in with id token " + account.getIdToken()));
     }
 
     public void createConnectionDialog(SQLConnectionManager.ConnectionData savedConnectionData) {
@@ -207,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ACC_SIGN_IN) {
+        if (requestCode == GoogleTokenManager.ACC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 GoogleSignInAccount account = data.getParcelableExtra("ACCOUNT");
                 Toast.makeText(this, "Bienvenido " + account.getEmail(), Toast.LENGTH_SHORT).show();

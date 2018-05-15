@@ -65,6 +65,10 @@ public abstract class AbstractFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         afterCreate();
+        afterCreateWithBundle(savedInstanceState);
+    }
+
+    public void afterCreateWithBundle(Bundle savedInstanceState) {
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -9,7 +10,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -42,6 +42,7 @@ public class DatabaseActionsActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.nav_tables_fragment);
 
         connectionData = (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA");
 
@@ -86,6 +87,11 @@ public class DatabaseActionsActivity extends AppCompatActivity
         } else if (id == R.id.nav_procedures_fragment) {
             fragment = AbstractFragment.newInstance(connectionData, ExecutablesFragment.class);
             fragment.getArguments().putInt("EXECUTABLE_TYPE", ExecutablesFragment.PROCEDURE);
+        } else if (id == R.id.nav_tables_maple) {
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+            startActivity(new Intent(this, MapleActivity.class).putExtra("CONNECTION_DATA", connectionData));
+            return true;
         }
         openFragment(fragment);
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/codemirror.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/codemirror.js"></script>
+    <script src="js/active-line.js"></script>
+    <script src="js/sql.js"></script>
+</head>
+<body>
+<div style="padding: 3px">
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)"><</button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">></button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">(</button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">)</button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">$</button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">?</button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">'</button>
+    <button class="btn-symbol" onclick="buttonEvent(this.innerText)">+</button>
+</div>
+
+<textarea name="" id="maple_code" cols="30" rows="10"></textarea>
+
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("maple_code"), {
+        lineNumbers: true,
+        lineWrapping: true,
+        styleActiveLine: true,
+        styleActiveSelected: true,
+        mode: "text/x-mysql"
+    });
+
+    function getValue() {
+        return editor.getValue();
+    }
+
+    function setValue(value) {
+        editor.setValue(value);
+    }
+
+    function buttonEvent(text) {
+        editor.setValue(editor.getValue() + text);
+        editor.focus();
+    }
+
+    editor.focus();
+</script>
+</body>
+</html>
