@@ -1,5 +1,7 @@
 package com.sqless.sqlessmobile.network;
 
+import com.sqless.sqlessmobile.utils.UIUtils;
+
 import us.monoid.json.JSONObject;
 import us.monoid.web.mime.MultipartContent;
 
@@ -25,6 +27,8 @@ public class PostRequest extends RestRequest {
                 executePostExec(json);
             } catch (Exception e) {
                 onFailure(e.getMessage());
+            } finally {
+                UIUtils.invokeOnUIThread(() -> afterRequest());
             }
         };
         if (newThread) {

@@ -41,8 +41,9 @@
     }
 
     function buttonEvent(text) {
-        editor.setValue(editor.getValue() + text);
         editor.focus();
+        editor.setValue(editor.getValue() + text);
+        editor.setCursor(editor.lineCount(), 0);
     }
 
     editor.focus();

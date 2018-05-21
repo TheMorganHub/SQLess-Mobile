@@ -31,6 +31,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
     private SQLTable newTable;
     EventBus bus = EventBus.getDefault();
     private SQLConnectionManager.ConnectionData connectionData;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +45,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
 
         bus.register(this);
 
-        ViewPager viewPager = findViewById(R.id.viewpager);
+        viewPager = findViewById(R.id.viewpager);
         FragmentPagerCreateTableAdapter adapter = new FragmentPagerCreateTableAdapter(this, getSupportFragmentManager(), getIntent().getExtras());
         viewPager.setAdapter(adapter);
         TabLayout tabLayout = findViewById(R.id.sliding_tabs);
@@ -91,6 +92,15 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
         super.onSaveInstanceState(outState);
         outState.putSerializable("NEW_TABLE", newTable);
         outState.putSerializable("CONNECTION_DATA", connectionData);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() != 0) {
+            viewPager.setCurrentItem(0, true);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

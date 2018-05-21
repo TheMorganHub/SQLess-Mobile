@@ -313,36 +313,7 @@ public class SQLUtils {
         SQLQuery tableQuery = new SQLSelectQuery(connData, sql) {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
-                HTMLDoc.HTMLDocBuilder builder = new HTMLDoc.HTMLDocBuilder("tablehtml")
-                        .withCss("style");
-
-                builder.addHTML("<table>");
-                builder.addHTML("<thead>");
-                builder.addHTML("<tr>");
-
-                List<String> tableHeaders = getTableHeaders(rs.getMetaData());
-                builder.addHTML("<th>").addHTML("</th>"); //numero de filas
-                for (String header : tableHeaders) {
-                    builder.addHTML("<th>").addHTML(header).addHTML("</th>");
-                }
-                builder.addHTML("</tr>");
-                builder.addHTML("</thead>");
-                builder.addHTML("<tbody>");
-
-                int rowCount = 0;
-                while (rs.next()) {
-                    builder.addHTML("<tr>");
-                    builder.addHTML("<td>").addHTML(++rowCount).addHTML("</td>");
-                    for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                        builder.addHTML(getHTMLForValue(rs.getMetaData().getColumnTypeName(i), rs, i));
-                    }
-                    builder.addHTML("</tr>");
-                }
-                builder.addHTML("</tbody>");
-                builder.addHTML("</table>");
-
-                HTMLDoc doc = builder.build();
-
+                HTMLDoc doc = createHTMLFromResultSet(rs);
                 UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(doc));
             }
 
@@ -352,6 +323,38 @@ public class SQLUtils {
             }
         };
         tableQuery.exec();
+    }
+
+    public static HTMLDoc createHTMLFromResultSet(ResultSet resultSet) throws SQLException {
+        HTMLDoc.HTMLDocBuilder builder = new HTMLDoc.HTMLDocBuilder("tablehtml")
+                .withCss("style");
+
+        builder.addHTML("<table>");
+        builder.addHTML("<thead>");
+        builder.addHTML("<tr>");
+
+        List<String> tableHeaders = getTableHeaders(resultSet.getMetaData());
+        builder.addHTML("<th>").addHTML("</th>"); //numero de filas
+        for (String header : tableHeaders) {
+            builder.addHTML("<th>").addHTML(header).addHTML("</th>");
+        }
+        builder.addHTML("</tr>");
+        builder.addHTML("</thead>");
+        builder.addHTML("<tbody>");
+
+        int rowCount = 0;
+        while (resultSet.next()) {
+            builder.addHTML("<tr>");
+            builder.addHTML("<td>").addHTML(++rowCount).addHTML("</td>");
+            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                builder.addHTML(getHTMLForValue(resultSet.getMetaData().getColumnTypeName(i), resultSet, i));
+            }
+            builder.addHTML("</tr>");
+        }
+        builder.addHTML("</tbody>");
+        builder.addHTML("</table>");
+
+        return builder.build();
     }
 
     private static String getHTMLForValue(String columnTypeName, ResultSet rs, int col) throws SQLException {

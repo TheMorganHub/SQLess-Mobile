@@ -12,12 +12,14 @@ import com.sqless.sqlessmobile.ui.FragmentPagerTableDetailsAdapter;
 
 public class TableDetailsActivity extends AppCompatActivity implements FragmentContainer {
 
+    private ViewPager viewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_details);
         // Find the view pager that will allow the user to swipe between fragments
-        ViewPager viewPager = findViewById(R.id.viewpager);
+        viewPager = findViewById(R.id.viewpager);
 
         // Create an adapter that knows which fragment should be shown on each page
         FragmentPagerTableDetailsAdapter adapter = new FragmentPagerTableDetailsAdapter(this, getSupportFragmentManager(), getIntent().getExtras());
@@ -43,6 +45,15 @@ public class TableDetailsActivity extends AppCompatActivity implements FragmentC
         }
 
         return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() != 0) {
+            viewPager.setCurrentItem(0, true);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

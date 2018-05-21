@@ -139,7 +139,7 @@ public class SQLConnectionManager {
         public Connection makeConnection() {
             Connection conn = null;
             try {
-                conn = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3", username, password);
+                conn = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3&allowMultiQueries=true", username, password);
             } catch (SQLException e) {
                 Log.e("ERR", "Could not create connection");
             }

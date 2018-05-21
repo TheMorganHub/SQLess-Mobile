@@ -3,6 +3,7 @@ package com.sqless.sqlessmobile.network;
 import android.util.Log;
 
 import com.sqless.sqlessmobile.utils.UIUtils;
+
 import us.monoid.json.JSONObject;
 import us.monoid.web.Resty;
 
@@ -28,23 +29,17 @@ public abstract class RestRequest {
      *
      * @param json
      * @throws Exception si hubo algún error dentro de este método. Por ejemplo,
-     * si el usuario manipula el JSON de manera erronea. Todas las excepciones
-     * de este método serán atrapadas por {@link #onFailure(java.lang.String)}
+     *                   si el usuario manipula el JSON de manera erronea. Todas las excepciones
+     *                   de este método serán atrapadas por {@link #onFailure(java.lang.String)}
      */
     public void onSuccess(JSONObject json) throws Exception {
     }
 
     /**
-     * Es llamado por {@link #executePostExec(us.monoid.json.JSONObject)} al
-     * completarse el request contra el servidor <b>exitosamente</b> y si la
-     * autenticación del token de usuario fue exitosa.
-     *
-     * @param json
-     * @throws Exception si hubo algún error dentro de este método. Por ejemplo,
-     * si el usuario manipula el JSON de manera erronea. Todas las excepciones
-     * de este método serán atrapadas por {@link #onFailure(java.lang.String)}
+     * Es llamado luego de un request, haya sido erroneo o exitoso. Este método se ejecutará
+     * en el UI thread.
      */
-    public void onTokenSuccess(JSONObject json) throws Exception {
+    public void afterRequest() {
     }
 
     /**
@@ -62,15 +57,12 @@ public abstract class RestRequest {
      * siempre son iguales, es por eso que toda implementación de
      * {@link #exec()} debe llamar a este método y pasarle el JSON resultante.
      * Es en este método en donde se ejecutarán los callback dados dependiendo
-     * el resultado de la ejecución. <br><br>
-     * Nota: este método se llamará dentro del <i>UI Thread</i>
-     *
-     * @see #onSuccess(us.monoid.json.JSONObject)
-     * @see #onTokenSuccess(us.monoid.json.JSONObject)
-     * @see #onFailure(java.lang.String)
+     * el resultado de la ejecución.
      *
      * @param json El JSON resultante que el servidor devolvió al ser ejecutado
-     * el request.
+     *             el request.
+     * @see #onSuccess(us.monoid.json.JSONObject)
+     * @see #onFailure(java.lang.String)
      */
     protected final void executePostExec(JSONObject json) {
         Runnable runnable = () -> {
