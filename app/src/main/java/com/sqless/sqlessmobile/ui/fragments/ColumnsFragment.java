@@ -1,6 +1,7 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -28,7 +29,7 @@ import java.util.List;
  * Esta diferencia es necesaria ya que en el caso de columnas de tablas, es necesario traer PK y FK.
  * En Views solo necesitamos los nombres.
  */
-public class ColumnsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+public class ColumnsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private ListViewImageAdapter<SQLColumn> columnsAdapter;
     private List<SQLColumn> columns;
@@ -36,6 +37,7 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
     private ProgressBar progressBar;
     public static final int TABLE = 632;
     public static final int VIEW = 865;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public ColumnsFragment() {
         // Required empty public constructor
@@ -44,14 +46,9 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
     @Override
     public void afterCreate() {
         final int tableType = getArguments().getInt("TABLE_TYPE", -1);
-
-        lv_columnas = fragmentView.findViewById(R.id.lv_columnas);
-        lv_columnas.setOnItemLongClickListener(this);
-        lv_columnas.setOnItemClickListener(this);
         progressBar = fragmentView.findViewById(R.id.column_progress_bar);
         if (columnsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-
             switch (tableType) {
                 case TABLE:
                     SQLUtils.getColumns(connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
@@ -65,6 +62,26 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
         }
     }
 
+    @Override
+    public void onRefresh() {
+        final int tableType = getArguments().getInt("TABLE_TYPE", -1);
+        switch (tableType) {
+            case TABLE:
+                SQLUtils.getColumns(connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                break;
+            case VIEW:
+                SQLUtils.getViewColumns(connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                break;
+        }
+    }
+
+    public void onColumnsRefresh(List<SQLColumn> columns) {
+        this.columns = columns;
+        columnsAdapter = new ListViewImageAdapter<>(getContext(), columns);
+        lv_columnas.setAdapter(columnsAdapter);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
     public void onColumnsLoaded(List<SQLColumn> columns) {
         this.columns = columns;
         columnsAdapter = new ListViewImageAdapter<>(getContext(), columns);
@@ -74,7 +91,11 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     protected void implementListeners(View containerView) {
-
+        swipeRefreshLayout = containerView.findViewById(R.id.lay_swipe_refresh_columns);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        lv_columnas = containerView.findViewById(R.id.lv_columnas);
+        lv_columnas.setOnItemLongClickListener(this);
+        lv_columnas.setOnItemClickListener(this);
     }
 
     @Override

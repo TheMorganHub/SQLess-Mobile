@@ -1,6 +1,7 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +20,7 @@ import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;
 
-public class ExecutablesFragment extends AbstractFragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+public class ExecutablesFragment extends AbstractFragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private ListView lvExecutables;
     private List<SQLExecutable> executables;
@@ -29,6 +30,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     public static final int FUNCTION = 575;
     public static final int PROCEDURE = 166;
     private TextView tvNoExecutables;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public ExecutablesFragment() {
         // Required empty public constructor
@@ -71,8 +73,15 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     }
 
     @Override
-    public String getFragTag() {
-        return getClass().getSimpleName() + "_" + (getArguments().getInt("EXECUTABLE_TYPE") == FUNCTION ? FUNCTION : PROCEDURE);
+    public void onRefresh() {
+        switch (executableType) {
+            case FUNCTION:
+                SQLUtils.getExecutables(connectionData, SQLFunction.class, this::onExecutablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                break;
+            case PROCEDURE:
+                SQLUtils.getExecutables(connectionData, SQLProcedure.class, this::onExecutablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                break;
+        }
     }
 
     public void onExecutablesLoaded(List<SQLExecutable> executables) {
@@ -81,13 +90,27 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
                 getResources().getDrawable(executableType == FUNCTION ? R.drawable.ic_functions_black_24dp : R.drawable.ic_procedures_black_24dp), executables);
         lvExecutables.setAdapter(executablesAdapter);
         progressBar.setVisibility(View.GONE);
-
         tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    public void onExecutablesRefresh(List<SQLExecutable> executables) {
+        this.executables = executables;
+        executablesAdapter = new ListViewImageAdapter<>(getContext(),
+                getResources().getDrawable(executableType == FUNCTION ? R.drawable.ic_functions_black_24dp : R.drawable.ic_procedures_black_24dp), executables);
+        lvExecutables.setAdapter(executablesAdapter);
+        tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public String getFragTag() {
+        return getClass().getSimpleName() + "_" + (getArguments().getInt("EXECUTABLE_TYPE") == FUNCTION ? FUNCTION : PROCEDURE);
     }
 
     @Override
     protected void implementListeners(View containerView) {
-
+        swipeRefreshLayout = containerView.findViewById(R.id.lay_swipe_refresh_executables);
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override

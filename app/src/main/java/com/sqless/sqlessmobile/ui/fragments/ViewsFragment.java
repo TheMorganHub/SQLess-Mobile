@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.ui.fragments;
 
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -18,18 +19,17 @@ import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;
 
-public class ViewsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+public class ViewsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private ListViewImageAdapter<SQLView> viewsAdapter;
     private List<SQLView> views;
     private ProgressBar progressBar;
     private ListView lv_views;
-
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public ViewsFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     protected String getTitle() {
@@ -45,11 +45,8 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     public void afterCreate() {
         progressBar = fragmentView.findViewById(R.id.progress_bar_views);
         lv_views = fragmentView.findViewById(R.id.lv_views);
-
         if (viewsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            lv_views.setOnItemLongClickListener(this);
-            lv_views.setOnItemClickListener(this);
             SQLUtils.getViews(connectionData, this::onViewsLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_views.setAdapter(viewsAdapter);
@@ -63,6 +60,19 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
         lv_views.setAdapter(viewsAdapter);
         progressBar.setVisibility(View.GONE);
         fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    public void onViewsRefresh(List<SQLView> views) {
+        this.views = views;
+        viewsAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_view), views);
+        lv_views.setAdapter(viewsAdapter);
+        fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onRefresh() {
+        SQLUtils.getViews(connectionData, this::onViewsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
     }
 
     @Override
@@ -99,6 +109,10 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
 
     @Override
     protected void implementListeners(View containerView) {
-
+        lv_views = containerView.findViewById(R.id.lv_views);
+        lv_views.setOnItemLongClickListener(this);
+        lv_views.setOnItemClickListener(this);
+        swipeRefreshLayout = containerView.findViewById(R.id.lay_swipe_refresh_views);
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 }

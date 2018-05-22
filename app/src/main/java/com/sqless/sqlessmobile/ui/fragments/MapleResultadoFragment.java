@@ -97,6 +97,7 @@ public class MapleResultadoFragment extends AbstractFragment {
         tvMapleErrors.setVisibility(View.VISIBLE);
         fragmentView.findViewById(R.id.webview_resultado).setVisibility(View.INVISIBLE);
         fragmentView.findViewById(R.id.spinner_resultado).setVisibility(View.INVISIBLE);
+        fragmentView.findViewById(R.id.tv_sql_no_result).setVisibility(View.INVISIBLE);
         fragmentView.findViewById(R.id.btn_show_sql).setVisibility(mapleError ? View.INVISIBLE : View.VISIBLE);
     }
 

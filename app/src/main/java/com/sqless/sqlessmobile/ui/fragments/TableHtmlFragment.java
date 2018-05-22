@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
@@ -7,7 +8,9 @@ import android.webkit.WebView;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 
-public class TableHtmlFragment extends AbstractFragment {
+public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshLayout.OnRefreshListener {
+
+    private SwipeRefreshLayout swipeRefreshLayout;
 
 
     public TableHtmlFragment() {
@@ -46,7 +49,24 @@ public class TableHtmlFragment extends AbstractFragment {
 
     @Override
     protected void implementListeners(View containerView) {
-
+        swipeRefreshLayout = containerView.findViewById(R.id.lay_swipe_refresh_html);
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 
+    @Override
+    public void onRefresh() {
+        String queryContents = getArguments().getString("QUERY");
+        if (queryContents != null) {
+            WebView wv = fragmentView.findViewById(R.id.wv_table);
+            SQLUtils.createHTMLFromQueryResult(connectionData, queryContents,
+                    doc -> {
+                        wv.loadDataWithBaseURL(doc.getAssetsFolder(), doc.getHTML(), "text/html", "utf-8", null);
+                        swipeRefreshLayout.setRefreshing(false);
+                    },
+                    err -> {
+                        Log.e(getClass().getSimpleName(), err);
+                        swipeRefreshLayout.setRefreshing(false);
+                    });
+        }
+    }
 }

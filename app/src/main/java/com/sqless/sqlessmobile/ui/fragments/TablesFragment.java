@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -19,12 +20,13 @@ import com.sqless.sqlessmobile.utils.SQLUtils;
 
 import java.util.List;
 
-public class TablesFragment extends AbstractFragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+public class TablesFragment extends AbstractFragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     private List<SQLTable> tables;
     private ListViewImageAdapter<SQLTable> tablesAdapter;
     private ListView lv_tables;
     private ProgressBar progressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private static final int TABLE_CREATION_RESULT = 341;
 
@@ -43,17 +45,27 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     @Override
     public void afterCreate() {
-        lv_tables = fragmentView.findViewById(R.id.lv_tables);
-        lv_tables.setOnItemClickListener(this);
-        lv_tables.setOnItemLongClickListener(this);
         progressBar = fragmentView.findViewById(R.id.progress_bar_tables);
-
         if (tablesAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
             SQLUtils.getTables(connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_tables.setAdapter(tablesAdapter);
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        SQLUtils.getTables(connectionData, this::onTablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+    }
+
+    public void onTablesRefresh(List<SQLTable> tables) {
+        this.tables = tables;
+        tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tables);
+        lv_tables.setAdapter(tablesAdapter);
+
+        swipeRefreshLayout.setRefreshing(false);
+        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     public void onTablesLoaded(List<SQLTable> tables) {
@@ -67,6 +79,11 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     @Override
     protected void implementListeners(View containerView) {
         containerView.findViewById(R.id.fab_create_table).setOnClickListener(view1 -> actionCreateTable());
+        swipeRefreshLayout = containerView.findViewById(R.id.lay_swipe_refresh_tables);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        lv_tables = containerView.findViewById(R.id.lv_tables);
+        lv_tables.setOnItemClickListener(this);
+        lv_tables.setOnItemLongClickListener(this);
     }
 
     public void actionCreateTable() {

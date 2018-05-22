@@ -20,9 +20,14 @@
         android:layout_gravity="center"
         android:visibility="invisible" />
 
-    <ListView
-        android:id="@+id/lv_executables"
+    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/lay_swipe_refresh_executables"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
+        <ListView
+            android:id="@+id/lv_executables"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 </FrameLayout>
