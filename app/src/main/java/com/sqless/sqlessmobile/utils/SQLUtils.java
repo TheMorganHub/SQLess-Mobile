@@ -294,11 +294,11 @@ public class SQLUtils {
         getFunctionsQuery.exec();
     }
 
-    public static void dropEntity(SQLConnectionManager.ConnectionData connData, SQLDroppable droppable, Callback callbackSuccess, Callback<String> callbackFailure) {
+    public static void dropEntity(SQLConnectionManager.ConnectionData connData, SQLDroppable droppable, Runnable callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery dropQuery = new SQLUpdateQuery(connData, droppable.getDropStatement()) {
             @Override
             public void onSuccess(int updateCount) {
-                UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(null));
+                UIUtils.invokeOnUIThread(callbackSuccess::run);
             }
 
             @Override

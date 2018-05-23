@@ -27,10 +27,14 @@ public abstract class SQLExecutable extends SQLObject implements SQLCallable, SQ
         StringBuilder paramsStmt = new StringBuilder();
         if (parameters != null) {
             for (SQLParameter parameter : parameters) {
-                paramsStmt.append(parameter.getValue()).append(", ");
+                paramsStmt.append("'").append(parameter.getValue()).append("'").append(", ");
             }
         }
         return (parameters != null && !parameters.isEmpty() ? paramsStmt.substring(0, paramsStmt.length() - 2) : paramsStmt.toString());
+    }
+
+    public boolean hasParameters() {
+        return parameters != null && !parameters.isEmpty();
     }
     
     @Override

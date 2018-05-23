@@ -4,6 +4,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.TextView;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.utils.SQLUtils;
@@ -36,14 +37,20 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
     }
 
     public void createHTMLTable(String sql) {
+        TextView tvError = fragmentView.findViewById(R.id.tv_table_html_error);
         WebView wv = fragmentView.findViewById(R.id.wv_table);
+
         wv.getSettings().setBuiltInZoomControls(true);
         wv.getSettings().setDisplayZoomControls(false);
         wv.getSettings().setDefaultTextEncodingName("utf-8");
 
         SQLUtils.createHTMLFromQueryResult(connectionData, sql,
                 doc -> wv.loadDataWithBaseURL(doc.getAssetsFolder(), doc.getHTML(), "text/html", "utf-8", null),
-                err -> Log.e(getClass().getSimpleName(), err));
+                err -> {
+                    wv.setVisibility(View.INVISIBLE);
+                    tvError.setVisibility(View.VISIBLE);
+                    tvError.setText("Hubo un error al ejecutar la consulta dada.\nEl servidor respondió con mensaje:\n" + err);
+                });
     }
 
 
@@ -57,13 +64,19 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
     public void onRefresh() {
         String queryContents = getArguments().getString("QUERY");
         if (queryContents != null) {
+            TextView tvError = fragmentView.findViewById(R.id.tv_table_html_error);
             WebView wv = fragmentView.findViewById(R.id.wv_table);
             SQLUtils.createHTMLFromQueryResult(connectionData, queryContents,
                     doc -> {
+                        wv.setVisibility(View.VISIBLE);
+                        tvError.setVisibility(View.INVISIBLE);
                         wv.loadDataWithBaseURL(doc.getAssetsFolder(), doc.getHTML(), "text/html", "utf-8", null);
                         swipeRefreshLayout.setRefreshing(false);
                     },
                     err -> {
+                        wv.setVisibility(View.INVISIBLE);
+                        tvError.setVisibility(View.VISIBLE);
+                        tvError.setText("Hubo un error al ejecutar la consulta dada.\nEl servidor respondió con mensaje:\n" + err);
                         Log.e(getClass().getSimpleName(), err);
                         swipeRefreshLayout.setRefreshing(false);
                     });

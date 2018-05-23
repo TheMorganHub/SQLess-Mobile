@@ -108,7 +108,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     }
 
     public void deleteTable(SQLTable table) {
-        SQLUtils.dropEntity(connectionData, table, nullobj -> {
+        SQLUtils.dropEntity(connectionData, table, () -> {
             tables.remove(table);
             tablesAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);

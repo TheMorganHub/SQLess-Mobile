@@ -100,7 +100,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     }
 
     public void deleteView(SQLView view) {
-        SQLUtils.dropEntity(connectionData, view, nullobj -> {
+        SQLUtils.dropEntity(connectionData, view, () -> {
             views.remove(view);
             viewsAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);

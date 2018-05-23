@@ -127,7 +127,7 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
     }
 
     public void deleteColumn(SQLColumn column) {
-        SQLUtils.dropEntity(connectionData, column, nullobj -> {
+        SQLUtils.dropEntity(connectionData, column, () -> {
             columns.remove(column);
             columnsAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_columns_exist).setVisibility(columns != null && !columns.isEmpty() ? View.GONE : View.VISIBLE);
