@@ -4,6 +4,7 @@ package com.sqless.sqlessmobile.ui.fragments;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -14,13 +15,14 @@ import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewColumnDetailsAdapter;
 import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateColumnsFragment extends AbstractFragment implements View.OnClickListener {
+public class CreateColumnsFragment extends AbstractFragment implements View.OnClickListener, AdapterView.OnItemLongClickListener {
 
     private List<SQLColumn> sqlColumns;
     private ListViewColumnDetailsAdapter adapter;
@@ -82,6 +84,39 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
         activeDialog = dialogBuilder.show();
     }
 
+    private void deleteColumn(SQLColumn column) {
+        sqlColumns.remove(column);
+        adapter.notifyDataSetChanged();
+        bus.post(new ColumnEvents.ColumnRemovedEvent(column));
+        if (sqlColumns.isEmpty()) {
+            fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void renameColumn(SQLColumn column) {
+        UIUtils.showInputDialog(getActivity(), "Renombrar " + column.getName(), newName -> {
+            column.setName(newName);
+            adapter.notifyDataSetChanged();
+        });
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
+        actionDialog.setItems(new String[]{"Eliminar", "Renombrar"}, (dialogInterface, clickedItem) -> {
+            switch (clickedItem) {
+                case 0:
+                    deleteColumn(sqlColumns.get(position));
+                    break;
+                case 1:
+                    renameColumn(sqlColumns.get(position));
+                    break;
+            }
+        });
+        activeDialog = actionDialog.show();
+        return true;
+    }
+
     @Override
     public void onFabClicked() {
         createNewColumnDialog();
@@ -89,5 +124,7 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
 
     @Override
     protected void implementListeners(View containerView) {
+        ListView lvCreateTableColumns = fragmentView.findViewById(R.id.lv_create_table_columns);
+        lvCreateTableColumns.setOnItemLongClickListener(this);
     }
 }

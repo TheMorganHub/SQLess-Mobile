@@ -3,7 +3,7 @@ package com.sqless.sqlessmobile.sqlobjects;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLTable extends SQLObject implements SQLDroppable {
+public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable {
 
     private List<SQLColumn> columns;
     private List<SQLForeignKey> foreignKeys;
@@ -18,8 +18,16 @@ public class SQLTable extends SQLObject implements SQLDroppable {
         columns.add(column);
     }
 
+    public void removeColumn(SQLColumn column) {
+        columns.remove(column);
+    }
+
     public void addFK(SQLForeignKey fk) {
         foreignKeys.add(fk);
+    }
+
+    public void removeFK(SQLForeignKey fk) {
+        foreignKeys.remove(fk);
     }
 
     public List<SQLColumn> getColumns() {
@@ -66,12 +74,17 @@ public class SQLTable extends SQLObject implements SQLDroppable {
     }
 
     @Override
-    public String toString() {
-        return getName();
+    public String getDropStatement() {
+        return "DROP TABLE `" + getName() + "`";
     }
 
     @Override
-    public String getDropStatement() {
-        return "DROP TABLE `" + getName() + "`";
+    public String getRenameStatement(String newName) {
+        return "RENAME TABLE `" + getName() + "` to `" + newName + "`";
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

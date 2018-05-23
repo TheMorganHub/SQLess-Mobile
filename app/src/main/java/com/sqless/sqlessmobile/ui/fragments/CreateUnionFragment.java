@@ -26,7 +26,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateUnionFragment extends AbstractFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class CreateUnionFragment extends AbstractFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener {
 
     private List<SQLForeignKey> foreignKeys;
     private ListViewImageAdapter<SQLForeignKey> adapter;
@@ -135,7 +135,31 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
 
     @Override
     protected void implementListeners(View containerView) {
+        ListView lvUnions = containerView.findViewById(R.id.lv_unions);
+        lvUnions.setOnItemLongClickListener(this);
+    }
 
+    public void deleteFk(SQLForeignKey fk) {
+        bus.post(new ColumnEvents.FKRemovedEvent(fk));
+        foreignKeys.remove(fk);
+        adapter.notifyDataSetChanged();
+        if (foreignKeys.isEmpty()) {
+            fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
+        actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
+            switch (clickedItem) {
+                case 0:
+                    deleteFk(foreignKeys.get(position));
+                    break;
+            }
+        });
+        activeDialog = actionDialog.show();
+        return true;
     }
 
     @Override

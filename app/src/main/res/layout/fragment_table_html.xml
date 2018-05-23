@@ -5,6 +5,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragments.TableHtmlFragment">
 
+    <ProgressBar
+        android:id="@+id/progress_bar_html_fragment"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="invisible" />
+
     <TextView
         android:id="@+id/tv_table_html_error"
         android:layout_width="wrap_content"

@@ -24,6 +24,22 @@ public class ColumnEvents {
         }
     }
 
+    public static class ColumnRemovedEvent {
+        public SQLColumn column;
+
+        public ColumnRemovedEvent(SQLColumn column) {
+            this.column = column;
+        }
+    }
+
+    public static class FKRemovedEvent {
+        public SQLForeignKey fk;
+
+        public FKRemovedEvent(SQLForeignKey fk) {
+            this.fk = fk;
+        }
+    }
+
     public static class ColumnsReceivedEvent {
         public List<SQLColumn> columns;
 

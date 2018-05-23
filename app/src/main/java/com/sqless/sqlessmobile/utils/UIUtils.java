@@ -48,9 +48,17 @@ public class UIUtils {
         EditText txtInput = viewInflated.findViewById(R.id.txt_input);
 
         builder.setPositiveButton("OK", (dialog, which) -> callbackYes.exec(txtInput.getText().toString()));
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
         builder.setView(viewInflated);
         builder.show();
+    }
+
+    public static void showMessageDialog(Context context, String title, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title)
+                .setMessage(msg)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
 }

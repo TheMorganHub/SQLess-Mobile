@@ -17,6 +17,7 @@ import com.sqless.sqlessmobile.ui.activities.TableDetailsActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.List;
 
@@ -92,27 +93,21 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         startActivityForResult(intent, TABLE_CREATION_RESULT);
     }
 
-    @Override
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        FinalValue<AlertDialog> dialog = new FinalValue<>();
-        AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
-        actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
-            switch (clickedItem) {
-                case 0:
-                    deleteTable(tables.get(i));
-                    break;
-            }
-        });
-        dialog.set(actionDialog.show());
-        return true;
-    }
-
     public void deleteTable(SQLTable table) {
         SQLUtils.dropEntity(connectionData, table, () -> {
             tables.remove(table);
             tablesAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
         }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar tabla"));
+    }
+
+    public void renameTable(SQLTable table) {
+        UIUtils.showInputDialog(getActivity(), "Renombrar " + table.getName(), nombre -> {
+            SQLUtils.renameEntity(connectionData, nombre, table, () -> {
+                table.setName(nombre);
+                tablesAdapter.notifyDataSetChanged();
+            }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + table.getName(), "Hubo un error al renombrar entidad: " + err));
+        });
     }
 
     @Override
@@ -142,5 +137,22 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         intent.putExtra("CONNECTION_DATA", connectionData);
         intent.putExtra("TABLE_TYPE", ColumnsFragment.TABLE);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
+        actionDialog.setItems(new String[]{"Eliminar", "Renombrar"}, (dialogInterface, clickedItem) -> {
+            switch (clickedItem) {
+                case 0:
+                    deleteTable(tables.get(i));
+                    break;
+                case 1:
+                    renameTable(tables.get(i));
+                    break;
+            }
+        });
+        activeDialog = actionDialog.show();
+        return true;
     }
 }

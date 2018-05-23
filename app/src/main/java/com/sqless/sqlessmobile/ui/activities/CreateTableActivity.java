@@ -15,6 +15,7 @@ import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLUpdateQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerCreateTableAdapter;
@@ -159,6 +160,11 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
     }
 
     @Subscribe
+    public void onColumnRemovedEvent(ColumnEvents.ColumnRemovedEvent event) {
+        newTable.removeColumn(event.column);
+    }
+
+    @Subscribe
     public void onColumnRequestEvent(ColumnEvents.ColumnRequestEvent event) {
         bus.post(new ColumnEvents.ColumnsReceivedEvent(newTable.getColumns()));
     }
@@ -166,6 +172,11 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
     @Subscribe
     public void onFkAddedEvent(ColumnEvents.FKAddedEvent event) {
         newTable.addFK(event.foreignKey);
+    }
+
+    @Subscribe
+    public void onFkRemovedEvent(ColumnEvents.FKRemovedEvent event) {
+        newTable.removeFK(event.fk);
     }
 
     @Override

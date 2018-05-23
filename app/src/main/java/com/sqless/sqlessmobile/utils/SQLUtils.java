@@ -13,6 +13,7 @@ import com.sqless.sqlessmobile.sqlobjects.SQLExecutable;
 import com.sqless.sqlessmobile.sqlobjects.SQLFunction;
 import com.sqless.sqlessmobile.sqlobjects.SQLParameter;
 import com.sqless.sqlessmobile.sqlobjects.SQLProcedure;
+import com.sqless.sqlessmobile.sqlobjects.SQLRenameable;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.sqlobjects.SQLView;
 
@@ -307,6 +308,21 @@ public class SQLUtils {
             }
         };
         dropQuery.exec();
+    }
+
+    public static void renameEntity(SQLConnectionManager.ConnectionData connData, String newName, SQLRenameable renameable, Runnable callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery renameQuery = new SQLUpdateQuery(connData, renameable.getRenameStatement(newName)) {
+            @Override
+            public void onSuccess(int updateCount) {
+                UIUtils.invokeOnUIThread(callbackSuccess::run);
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThread(() -> callbackFailure.exec(errMessage));
+            }
+        };
+        renameQuery.exec();
     }
 
     public static void createHTMLFromQueryResult(SQLConnectionManager.ConnectionData connData, String sql, Callback<HTMLDoc> callbackSuccess, Callback<String> callbackFailure) {
