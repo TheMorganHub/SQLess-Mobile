@@ -59,7 +59,9 @@ public class SignInActivity extends Activity implements View.OnClickListener {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
+            if (task.isSuccessful()) {
+                handleSignInResult(task);
+            }
         }
     }
 

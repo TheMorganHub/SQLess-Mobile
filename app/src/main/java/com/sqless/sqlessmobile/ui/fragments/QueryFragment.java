@@ -1,14 +1,11 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
-import android.os.AsyncTask;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.utils.PrettifyHighlighter;
-
-import java.lang.ref.WeakReference;
 
 public class QueryFragment extends AbstractFragment {
 
@@ -29,31 +26,14 @@ public class QueryFragment extends AbstractFragment {
 
     @Override
     public void afterCreate() {
-        HighlightSQLSyntaxTask syntaxTask = new HighlightSQLSyntaxTask(this);
-        syntaxTask.execute(getArguments().getString("QUERY"));
+        String sql = getArguments().getString("QUERY");
+        PrettifyHighlighter highlighter = new PrettifyHighlighter();
+        String highlighted = highlighter.highlight("sql", sql);
+        ((TextView) fragmentView.findViewById(R.id.tv_query_sql)).setText(Html.fromHtml(highlighted));
     }
 
     @Override
     protected void implementListeners(View containerView) {
 
-    }
-
-    static class HighlightSQLSyntaxTask extends AsyncTask<String, Void, String> {
-        WeakReference<QueryFragment> weakFragment;
-
-        public HighlightSQLSyntaxTask(QueryFragment fragment) {
-            this.weakFragment = new WeakReference<>(fragment);
-        }
-
-        @Override
-        protected String doInBackground(String... sql) {
-            PrettifyHighlighter highlighter = new PrettifyHighlighter();
-            return highlighter.highlight("sql", sql[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String highlightedString) {
-            ((TextView) weakFragment.get().fragmentView.findViewById(R.id.tv_query_sql)).setText(Html.fromHtml(highlightedString));
-        }
     }
 }
