@@ -87,8 +87,7 @@ public class MapleCrearFragment extends AbstractFragment {
 
     public void doExecuteMaple(String idToken, String mapleStatement) {
         fragmentView.findViewById(R.id.progress_bar_maple).setVisibility(View.VISIBLE);
-        RestRequest mapleRequest = new PostRequest(getString(R.string.maple_url), Resty.form(Resty.data("maple_statement", mapleStatement),
-                Resty.data("id_token", idToken))) {
+        RestRequest mapleRequest = new PostRequest(getString(R.string.maple_url), Resty.data("maple_statement", mapleStatement), Resty.data("id_token", idToken)) {
             @Override
             public void onSuccess(JSONObject json) throws Exception {
                 if (json.has("err")) { //hubo un error interno en el server

@@ -42,8 +42,13 @@
 
     function buttonEvent(text) {
         editor.focus();
-        editor.setValue(editor.getValue() + text);
-        editor.setCursor(editor.lineCount(), 0);
+        insertTextAtCursor(text);
+    }
+
+    function insertTextAtCursor(text) {
+        var doc = editor.getDoc();
+        var cursor = doc.getCursor();
+        doc.replaceRange(text, cursor);
     }
 
     editor.focus();

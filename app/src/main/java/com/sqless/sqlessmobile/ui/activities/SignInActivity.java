@@ -74,8 +74,7 @@ public class SignInActivity extends Activity implements View.OnClickListener {
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
 
             final GoogleSignInAccount account = task.getResult(ApiException.class);
-            RestRequest request = new PostRequest(getString(R.string.auth_url), Resty.form(Resty.data("id_token", account.getIdToken()),
-                    Resty.data("source", "MOBILE"))) {
+            RestRequest request = new PostRequest(getString(R.string.auth_url), Resty.data("id_token", account.getIdToken())) {
                 @Override
                 public void onSuccess(JSONObject json) throws Exception {
                     //si la autenticación con el backend fue exitosa, el json va a contener token_info. Si no fue exitosa, esto va a tirar una exception e ir a onFailure()
