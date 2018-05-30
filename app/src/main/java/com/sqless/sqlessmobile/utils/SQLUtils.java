@@ -109,10 +109,7 @@ public class SQLUtils {
                 while (rs.next()) {
                     names.add(rs.getString(1));
                 }
-                if (!context.isDestroyed()) {
-                    UIUtils.invokeOnUIThread(() -> callbackSuccess.exec(names));
-                }
-
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> callbackSuccess.exec(names));
             }
 
             @Override

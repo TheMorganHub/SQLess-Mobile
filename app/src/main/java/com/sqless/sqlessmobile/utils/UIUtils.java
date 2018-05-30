@@ -7,11 +7,11 @@ import android.os.Looper;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.sqless.sqlessmobile.R;
-import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
 public class UIUtils {
 
@@ -44,6 +44,14 @@ public class UIUtils {
             }
         }
         return index;
+    }
+
+    public static void hideKeyboardAt(Activity context) {
+        View view = context.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     public static void showInputDialog(Context context, String title, Callback<String> callbackYes) {

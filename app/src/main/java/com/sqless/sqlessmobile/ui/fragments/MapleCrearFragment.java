@@ -16,6 +16,7 @@ import com.sqless.sqlessmobile.ui.busevents.maplequery.RunMapleEvent;
 import com.sqless.sqlessmobile.utils.HTMLDoc;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 import com.sqless.sqlessmobile.utils.TextUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -158,13 +159,15 @@ public class MapleCrearFragment extends AbstractFragment {
 
         @Override
         protected void onPostExecute(List<HTMLDoc> s) {
+            MapleCrearFragment frag = fragment.get();
+            UIUtils.hideKeyboardAt(frag.getActivity());
             if (queryStatus) {
-                fragment.get().bus.post(new RunMapleEvent.HTMLReadyEvent(s));
+                frag.bus.post(new RunMapleEvent.HTMLReadyEvent(s));
             } else {
-                fragment.get().bus.post(new RunMapleEvent.SQLExceptionEvent(exceptionMessage));
+                frag.bus.post(new RunMapleEvent.SQLExceptionEvent(exceptionMessage));
             }
-            fragment.get().bus.post(new RunMapleEvent.SQLReadyEvent(sql));
-            fragment.get().bus.post(new MapleExecutionReadyEvent());
+            frag.bus.post(new RunMapleEvent.SQLReadyEvent(sql));
+            frag.bus.post(new MapleExecutionReadyEvent());
         }
     }
 }
