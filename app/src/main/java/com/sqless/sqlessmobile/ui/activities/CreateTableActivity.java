@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -67,7 +68,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
                     case 0:
                     case 1:
                         //el invokeOnUIThread le permite al adapter llenarse con los fragmentos antes de ejecutarse este bloque de código, si no esperamos, el adapter devolverá un fragment null
-                        UIUtils.invokeOnUIThread(() -> {
+                        UIUtils.invokeOnUIThreadIfNotDestroyed(CreateTableActivity.this, () -> {
                             AbstractFragment fragment = adapter.getRegisteredFragment(position);
                             fab.setOnClickListener(view -> fragment.onFabClicked());
                             fab.show();
@@ -130,10 +131,10 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
     public void confirmTableCreation() {
         UIUtils.showInputDialog(this, "Nombre", nombre -> {
             newTable.setName(nombre);
-            SQLQuery createTableQuery = new SQLUpdateQuery(connectionData, newTable.generateCreateStatement()) {
+            SQLQuery createTableQuery = new SQLUpdateQuery(this, connectionData, newTable.generateCreateStatement()) {
                 @Override
                 public void onConnectionKilled() {
-                    UIUtils.invokeOnUIThread(() -> {
+                    UIUtils.invokeOnUIThreadIfNotDestroyed(CreateTableActivity.this, () -> {
                         setResult(RESULT_OK, new Intent().putExtra("NEW_TABLE", newTable));
                         finish();
                     });
@@ -142,7 +143,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
                 @Override
                 public void onFailure(String errMessage) {
                     Log.e("ERR", errMessage);
-                    UIUtils.invokeOnUIThread(() -> Toast.makeText(CreateTableActivity.this, "Hubo un error al crear la tabla", Toast.LENGTH_SHORT).show());
+                    UIUtils.invokeOnUIThreadIfNotDestroyed(CreateTableActivity.this, () -> Toast.makeText(CreateTableActivity.this, "Hubo un error al crear la tabla", Toast.LENGTH_SHORT).show());
                 }
             };
             createTableQuery.exec();

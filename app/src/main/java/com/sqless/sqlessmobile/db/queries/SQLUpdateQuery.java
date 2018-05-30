@@ -1,5 +1,7 @@
 package com.sqless.sqlessmobile.db.queries;
 
+import android.app.Activity;
+
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
 import java.sql.SQLException;
@@ -13,8 +15,8 @@ public class SQLUpdateQuery extends SQLQuery {
      * @param connectionData
      * @param sql
      */
-    public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql) {
-        super(connectionData, sql, true);
+    public SQLUpdateQuery(Activity context, SQLConnectionManager.ConnectionData connectionData, String sql) {
+        super(context, connectionData, sql, true);
     }
 
     /**
@@ -25,14 +27,14 @@ public class SQLUpdateQuery extends SQLQuery {
      * @param sql
      * @param newThread
      */
-    public SQLUpdateQuery(SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
-        super(connectionData, sql, newThread);
+    public SQLUpdateQuery(Activity context, SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
+        super(context, connectionData, sql, newThread);
     }
 
     @Override
     protected void doExecute() {
         try {
-            connection = connectionData.makeConnection();
+            connection = connectionData.makeConnection(getContext());
             if (connection != null) {
                 statement = connection.createStatement();
                 int affectedRows = statement.executeUpdate(getSql());

@@ -67,10 +67,10 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
             progressBar.setVisibility(View.VISIBLE);
             switch (executableType) {
                 case FUNCTION:
-                    SQLUtils.getExecutables(connectionData, SQLFunction.class, this::onExecutablesLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getExecutables(getActivity(), connectionData, SQLFunction.class, this::onExecutablesLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
                 case PROCEDURE:
-                    SQLUtils.getExecutables(connectionData, SQLProcedure.class, this::onExecutablesLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getExecutables(getActivity(), connectionData, SQLProcedure.class, this::onExecutablesLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
             }
         } else {
@@ -83,10 +83,10 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     public void onRefresh() {
         switch (executableType) {
             case FUNCTION:
-                SQLUtils.getExecutables(connectionData, SQLFunction.class, this::onExecutablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                SQLUtils.getExecutables(getActivity(), connectionData, SQLFunction.class, this::onExecutablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
                 break;
             case PROCEDURE:
-                SQLUtils.getExecutables(connectionData, SQLProcedure.class, this::onExecutablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                SQLUtils.getExecutables(getActivity(), connectionData, SQLProcedure.class, this::onExecutablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
                 break;
         }
     }
@@ -138,7 +138,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
             for (int i = 0; i < executable.getParameters().size(); i++) {
                 SQLParameter parameter = executable.getParameters().get(i);
                 View parameterView = LayoutInflater.from(getActivity()).inflate(R.layout.executable_parameter, null);
-                ((TextInputLayout) parameterView.findViewById(R.id.txt_lay_parameter)).setHint(parameter.getName());
+                ((TextInputLayout) parameterView.findViewById(R.id.txt_lay_parameter)).setHint(parameter.getName() + " (" + parameter.getDataType() + ")");
                 parameterView.findViewById(R.id.txt_lay_parameter).setContentDescription("Parameter");
                 mainLayout.addView(parameterView, i);
             }
@@ -187,7 +187,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     }
 
     public void deleteExecutable(SQLExecutable executable) {
-        SQLUtils.dropEntity(connectionData, executable, () -> {
+        SQLUtils.dropEntity(getActivity(), connectionData, executable, () -> {
             executables.remove(executable);
             executablesAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_executables_exist).setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);

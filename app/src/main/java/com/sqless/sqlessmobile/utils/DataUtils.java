@@ -51,7 +51,7 @@ public class DataUtils {
 
         @Override
         protected Void doInBackground(String... strings) {
-            SQLQuery query = new SQLSelectQuery(connectionData, "SELECT * FROM " + connectionData.getTableName(), false) {
+            SQLQuery query = new SQLSelectQuery(activity.get(), connectionData, "SELECT * FROM " + connectionData.getTableName(), false) {
                 @Override
                 public void onSuccess(ResultSet rs) throws SQLException {
                     try (OutputStream out = activity.get().getContentResolver().openOutputStream(file.getUri())) {
@@ -141,7 +141,7 @@ public class DataUtils {
 
         @Override
         protected Void doInBackground(String... tableName) {
-            SQLQuery query = new SQLSelectQuery(connectionData, "SELECT * FROM " + connectionData.getTableName(), false) {
+            SQLQuery query = new SQLSelectQuery(activity.get(), connectionData, "SELECT * FROM " + connectionData.getTableName(), false) {
                 @Override
                 public void onSuccess(ResultSet rs) throws SQLException {
                     try (OutputStream out = activity.get().getContentResolver().openOutputStream(file.getUri())) {

@@ -49,7 +49,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         progressBar = fragmentView.findViewById(R.id.progress_bar_tables);
         if (tablesAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getTables(connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
+            SQLUtils.getTables(getActivity(), connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_tables.setAdapter(tablesAdapter);
         }
@@ -57,7 +57,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     @Override
     public void onRefresh() {
-        SQLUtils.getTables(connectionData, this::onTablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+        SQLUtils.getTables(getActivity(), connectionData, this::onTablesRefresh, err -> swipeRefreshLayout.setRefreshing(false));
     }
 
     public void onTablesRefresh(List<SQLTable> tables) {
@@ -94,7 +94,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     }
 
     public void deleteTable(SQLTable table) {
-        SQLUtils.dropEntity(connectionData, table, () -> {
+        SQLUtils.dropEntity(getActivity(), connectionData, table, () -> {
             tables.remove(table);
             tablesAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
@@ -103,7 +103,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     public void renameTable(SQLTable table) {
         UIUtils.showInputDialog(getActivity(), "Renombrar " + table.getName(), nombre -> {
-            SQLUtils.renameEntity(connectionData, nombre, table, () -> {
+            SQLUtils.renameEntity(getActivity(), connectionData, nombre, table, () -> {
                 table.setName(nombre);
                 tablesAdapter.notifyDataSetChanged();
             }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + table.getName(), "Hubo un error al renombrar entidad: " + err));

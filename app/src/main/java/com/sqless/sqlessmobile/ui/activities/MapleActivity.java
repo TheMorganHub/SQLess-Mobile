@@ -51,7 +51,7 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
                 switch (position) {
                     case 0:
                         //el invokeOnUIThread le permite al adapter llenarse con los fragmentos antes de ejecutarse este bloque de código, si no esperamos, el adapter devolverá un fragment null
-                        UIUtils.invokeOnUIThread(() -> {
+                        UIUtils.invokeOnUIThreadIfNotDestroyed(MapleActivity.this, () -> {
                             AbstractFragment fragment = adapter.getRegisteredFragment(position);
                             fab.setOnClickListener(view -> fragment.onFabClicked());
                             fab.show();

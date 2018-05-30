@@ -86,7 +86,7 @@ public class SignInActivity extends Activity implements View.OnClickListener {
                 @Override
                 public void onFailure(String message) {
                     mGoogleSignInClient.signOut();
-                    UIUtils.invokeOnUIThread(() -> {
+                    UIUtils.invokeOnUIThreadIfNotDestroyed(SignInActivity.this, () -> {
                         signInProgressBar.setVisibility(View.INVISIBLE);
                         String errMessage = "Hubo un error al procesar la autenticación con Google.";
                         if (message.equals("connect timed out")) {

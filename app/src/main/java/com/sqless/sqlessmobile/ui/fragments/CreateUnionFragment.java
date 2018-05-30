@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
@@ -89,7 +90,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
 
         ProgressBar progressBar = viewInflated.findViewById(R.id.progress_ref_table);
         progressBar.setVisibility(View.VISIBLE);
-        SQLUtils.getTables(connectionData, names -> {
+        SQLUtils.getTables(getActivity(), connectionData, names -> {
             if (activeDialog != null && activeDialog.isShowing()) {
                 spinnerRefTableAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, names);
                 tablesSpinner.setAdapter(spinnerRefTableAdapter);
@@ -118,9 +119,19 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
     public void onClick(View view) {
         View inflatedView = view.getRootView();
         String fkNombre = ((EditText) inflatedView.findViewById(R.id.txt_fk_name)).getText().toString();
-        String fkColumna = ((SQLColumn) ((Spinner) inflatedView.findViewById(R.id.sp_fk_col_name)).getSelectedItem()).getName();
-        String fkRefTableName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_table)).getSelectedItem().toString();
-        String fkRefColName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_col)).getSelectedItem().toString();
+        Object objFkColumn = ((Spinner) inflatedView.findViewById(R.id.sp_fk_col_name)).getSelectedItem();
+        Object objFkRefTableName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_table)).getSelectedItem();
+        Object objRefColName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_col)).getSelectedItem();
+
+        if (fkNombre.isEmpty() || objFkColumn == null || objFkRefTableName == null || objRefColName == null) {
+            Toast.makeText(view.getContext(), "Ninguno de los campos puede estar vacío", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String fkColumna = ((SQLColumn) objFkColumn).getName();
+        String fkRefTableName = objFkRefTableName.toString();
+        String fkRefColName = objRefColName.toString();
+
         SQLForeignKey newFk = new SQLForeignKey(fkNombre, fkColumna, fkRefTableName, fkRefColName);
         foreignKeys.add(newFk);
         adapter.notifyDataSetChanged();
@@ -169,7 +180,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
         progressBar.setVisibility(View.VISIBLE);
         String tableNameSelected = spinnerRefTableAdapter.getItem(i).getName();
         Spinner refColumnsSpinner = dialogInflatedView.findViewById(R.id.sp_fk_ref_col);
-        SQLUtils.getColumnNamesInTable(connectionData, tableNameSelected, names -> {
+        SQLUtils.getColumnNamesInTable(getActivity(), connectionData, tableNameSelected, names -> {
             if (activeDialog != null && activeDialog.isShowing()) {
                 spinnerRefColumnAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, names);
                 refColumnsSpinner.setAdapter(spinnerRefColumnAdapter);

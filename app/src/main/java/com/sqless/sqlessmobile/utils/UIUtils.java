@@ -24,6 +24,12 @@ public class UIUtils {
         new Handler(Looper.getMainLooper()).post(runnable);
     }
 
+    public static void invokeOnUIThreadIfNotDestroyed(Activity activity, Runnable runnable) {
+        if (activity != null && !activity.isDestroyed()) {
+            invokeOnUIThread(runnable);
+        }
+    }
+
     public static void selectSpinnerItemByValue(Spinner spinner, String val) {
         spinner.setSelection(getIndex(spinner, val));
     }
@@ -54,7 +60,7 @@ public class UIUtils {
     }
 
     public static void showMessageDialog(Context context, String title, String msg) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.Theme_AppCompat_Light_Dialog_Alert);
         builder.setTitle(title)
                 .setMessage(msg)
                 .setPositiveButton("OK", null)

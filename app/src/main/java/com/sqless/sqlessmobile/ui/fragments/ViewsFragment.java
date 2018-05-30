@@ -47,7 +47,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
         lv_views = fragmentView.findViewById(R.id.lv_views);
         if (viewsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
-            SQLUtils.getViews(connectionData, this::onViewsLoaded, err -> progressBar.setVisibility(View.GONE));
+            SQLUtils.getViews(getActivity(), connectionData, this::onViewsLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_views.setAdapter(viewsAdapter);
             fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
@@ -72,7 +72,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
 
     @Override
     public void onRefresh() {
-        SQLUtils.getViews(connectionData, this::onViewsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+        SQLUtils.getViews(getActivity(), connectionData, this::onViewsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     }
 
     public void deleteView(SQLView view) {
-        SQLUtils.dropEntity(connectionData, view, () -> {
+        SQLUtils.dropEntity(getActivity(), connectionData, view, () -> {
             views.remove(view);
             viewsAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);

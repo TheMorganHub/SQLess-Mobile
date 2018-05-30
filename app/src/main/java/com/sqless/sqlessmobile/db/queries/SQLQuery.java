@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.db.queries;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
@@ -21,16 +22,22 @@ public abstract class SQLQuery {
      */
     protected boolean querySuccess;
     protected Connection connection;
+    private Activity context;
 
-    public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql) {
+    public SQLQuery(Activity context, SQLConnectionManager.ConnectionData conData, String sql) {
         this.sql = SQLUtils.filterDelimiterKeyword(sql);
         this.connectionData = conData;
         querySuccess = false;
+        this.context = context;
     }
 
-    public SQLQuery(SQLConnectionManager.ConnectionData conData, String sql, boolean newThread) {
-        this(conData, sql);
+    public SQLQuery(Activity activity, SQLConnectionManager.ConnectionData conData, String sql, boolean newThread) {
+        this(activity, conData, sql);
         this.newThread = newThread;
+    }
+
+    public Activity getContext() {
+        return context;
     }
 
     public String getSql() {

@@ -12,10 +12,10 @@ import com.sqless.sqlessmobile.R;
 
 import java.util.List;
 
-public class ListViewSubtituladoAdapter<T extends Subtitulado> extends ArrayAdapter<T> {
+public class ListViewDBConnectionAdapter<T extends Subtitulado> extends ArrayAdapter<T> {
 
-    public ListViewSubtituladoAdapter(Activity context, List<T> datos) {
-        super(context, R.layout.list_item_simple, datos);
+    public ListViewDBConnectionAdapter(Activity context, List<T> datos) {
+        super(context, R.layout.list_item_subtitulado_image, datos);
     }
 
     private static class ViewHolder {
@@ -33,7 +33,7 @@ public class ListViewSubtituladoAdapter<T extends Subtitulado> extends ArrayAdap
         if (convertView == null) {
             viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.list_item_simple, parent, false);
+            convertView = inflater.inflate(R.layout.list_item_subtitulado_image, parent, false);
             viewHolder.txtTitle = convertView.findViewById(R.id.txtTitle);
             viewHolder.txtSubtitle = convertView.findViewById(R.id.txtSubtitle);
 

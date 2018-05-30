@@ -1,5 +1,8 @@
 package com.sqless.sqlessmobile.db.queries;
 
+import android.app.Activity;
+import android.content.Context;
+
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 
 import java.sql.ResultSet;
@@ -14,8 +17,8 @@ public class SQLSelectQuery extends SQLQuery {
      * @param connectionData
      * @param sql
      */
-    public SQLSelectQuery(SQLConnectionManager.ConnectionData connectionData, String sql) {
-        super(connectionData, sql, true);
+    public SQLSelectQuery(Activity context, SQLConnectionManager.ConnectionData connectionData, String sql) {
+        super(context, connectionData, sql, true);
     }
 
     /**
@@ -26,14 +29,14 @@ public class SQLSelectQuery extends SQLQuery {
      * @param sql
      * @param newThread
      */
-    public SQLSelectQuery(SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
-        super(connectionData, sql, newThread);
+    public SQLSelectQuery(Activity context, SQLConnectionManager.ConnectionData connectionData, String sql, boolean newThread) {
+        super(context, connectionData, sql, newThread);
     }
 
     @Override
     protected void doExecute() {
         try {
-            connection = connectionData.makeConnection();
+            connection = connectionData.makeConnection(getContext());
             if (connection != null) {
                 statement = connection.createStatement();
                 ResultSet rs = statement.executeQuery(getSql());

@@ -48,7 +48,7 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
 
         progressBar.setVisibility(View.VISIBLE);
         wv.setVisibility(View.INVISIBLE);
-        SQLUtils.createHTMLFromQueryResult(connectionData, sql,
+        SQLUtils.createHTMLFromQueryResult(getActivity(), connectionData, sql,
                 doc -> {
                     wv.setVisibility(View.VISIBLE);
                     wv.loadDataWithBaseURL(doc.getAssetsFolder(), doc.getHTML(), "text/html", "utf-8", null);
@@ -74,7 +74,7 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
         if (queryContents != null) {
             TextView tvError = fragmentView.findViewById(R.id.tv_table_html_error);
             WebView wv = fragmentView.findViewById(R.id.wv_table);
-            SQLUtils.createHTMLFromQueryResult(connectionData, queryContents,
+            SQLUtils.createHTMLFromQueryResult(getActivity(), connectionData, queryContents,
                     doc -> {
                         wv.setVisibility(View.VISIBLE);
                         tvError.setVisibility(View.INVISIBLE);

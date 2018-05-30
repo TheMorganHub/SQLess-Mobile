@@ -24,7 +24,7 @@ public class SQLParameter extends SQLObject {
 
     @Override
     public String toString() {
-        return getName() + " [" + dataType + "]";
+        return getName();
     }
     
 }

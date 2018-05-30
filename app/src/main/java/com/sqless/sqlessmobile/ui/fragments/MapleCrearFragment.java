@@ -137,7 +137,7 @@ public class MapleCrearFragment extends AbstractFragment {
         protected List<HTMLDoc> doInBackground(String... strings) {
             List<HTMLDoc> htmlResults = new ArrayList<>();
             try {
-                Connection conn = fragment.get().connectionData.makeConnection();
+                Connection conn = fragment.get().connectionData.makeConnection(fragment.get().getActivity());
                 Statement statement = conn.createStatement();
                 int updateCount = 0;
                 this.sql = strings[0];

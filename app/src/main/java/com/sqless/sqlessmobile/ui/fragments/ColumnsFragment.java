@@ -51,10 +51,10 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
             progressBar.setVisibility(View.VISIBLE);
             switch (tableType) {
                 case TABLE:
-                    SQLUtils.getColumns(connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getColumns(getActivity(), connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
                 case VIEW:
-                    SQLUtils.getViewColumns(connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getViewColumns(getActivity(), connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
             }
         } else { //ya existe una instancia del fragment
@@ -67,10 +67,10 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
         final int tableType = getArguments().getInt("TABLE_TYPE", -1);
         switch (tableType) {
             case TABLE:
-                SQLUtils.getColumns(connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                SQLUtils.getColumns(getActivity(), connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
                 break;
             case VIEW:
-                SQLUtils.getViewColumns(connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                SQLUtils.getViewColumns(getActivity(), connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
                 break;
         }
     }
@@ -127,7 +127,7 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
     }
 
     public void deleteColumn(SQLColumn column) {
-        SQLUtils.dropEntity(connectionData, column, () -> {
+        SQLUtils.dropEntity(getActivity(), connectionData, column, () -> {
             columns.remove(column);
             columnsAdapter.notifyDataSetChanged();
             fragmentView.findViewById(R.id.tv_no_columns_exist).setVisibility(columns != null && !columns.isEmpty() ? View.GONE : View.VISIBLE);

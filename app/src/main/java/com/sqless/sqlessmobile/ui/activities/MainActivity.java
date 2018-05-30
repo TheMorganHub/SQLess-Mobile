@@ -33,6 +33,7 @@ import com.sqless.sqlessmobile.network.GoogleTokenManager;
 import com.sqless.sqlessmobile.network.PostRequest;
 import com.sqless.sqlessmobile.network.RestRequest;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.ui.adapters.listview.ListViewDBConnectionAdapter;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewSubtituladoAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.UIUtils;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private AlertDialog activeDialog;
     private List<SQLConnectionManager.ConnectionData> connectionDataList;
-    private ListViewSubtituladoAdapter<SQLConnectionManager.ConnectionData> adapter;
+    private ListViewDBConnectionAdapter<SQLConnectionManager.ConnectionData> adapter;
     private HelperDB dbHelper;
 
     @Override
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> createConnectionDialog(null));
         ListView lvConnections = findViewById(R.id.lv_connections);
-        adapter = new ListViewSubtituladoAdapter<>(this, connectionDataList);
+        adapter = new ListViewDBConnectionAdapter<>(this, connectionDataList);
 
         lvConnections.setAdapter(adapter);
         lvConnections.setOnItemLongClickListener(this);

@@ -1,16 +1,19 @@
 package com.sqless.sqlessmobile.network;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.adapters.listview.Subtitulado;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.io.Serializable;
 import java.nio.BufferUnderflowException;
@@ -50,7 +53,7 @@ public class SQLConnectionManager {
             try (Connection testCon = DriverManager.getConnection("jdbc:drizzle://" + hostName + ":" + port + "/mysql?connectTimeout=3", username, password)) {
                 lastSuccessful = new ConnectionData(hostName, port, "mysql", username, password);
 
-                SQLUtils.getDatabaseNames(lastSuccessful, names -> {
+                SQLUtils.getDatabaseNames((Activity) v.getContext(), lastSuccessful, names -> {
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, names);
                     ((Spinner) v.findViewById(R.id.spinner_dbs)).setAdapter(adapter);
                     v.findViewById(R.id.spinner_dbs).setVisibility(View.VISIBLE);
@@ -75,10 +78,6 @@ public class SQLConnectionManager {
 
     public ConnectionData getLastSuccessful() {
         return lastSuccessful;
-    }
-
-    public Connection getConnection(ConnectionData data) {
-        return data.makeConnection();
     }
 
     public static SQLConnectionManager getInstance() {
@@ -136,12 +135,12 @@ public class SQLConnectionManager {
             return id;
         }
 
-        public Connection makeConnection() {
+        public Connection makeConnection(Activity context) {
             Connection conn = null;
             try {
                 conn = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3&allowMultiQueries=true", username, password);
             } catch (SQLException e) {
-                Log.e("ERR", "Could not create connection");
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> UIUtils.showMessageDialog(context, "Error de conexión", "La conexión con el servidor MySQL no se pudo crear.\n" + e.getMessage()));
             }
             return conn;
         }
