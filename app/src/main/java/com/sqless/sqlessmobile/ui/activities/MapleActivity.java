@@ -1,26 +1,45 @@
 package com.sqless.sqlessmobile.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerMapleAdapter;
 import com.sqless.sqlessmobile.ui.busevents.maplequery.MapleExecutionReadyEvent;
+import com.sqless.sqlessmobile.ui.busevents.maplequery.RunMapleEvent;
 import com.sqless.sqlessmobile.ui.fragments.AbstractFragment;
+import com.sqless.sqlessmobile.utils.DataUtils;
+import com.sqless.sqlessmobile.utils.FinalValue;
+import com.sqless.sqlessmobile.utils.HTMLDoc;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MapleActivity extends AppCompatActivity implements FragmentContainer {
 
     EventBus bus = EventBus.getDefault();
     private ViewPager viewPager;
+    private List<HTMLDoc> resultsHtml;
+    private List<Integer> selectedResults;
+    private static final int FILE_CHOOSER_JSON = 42;
+    private static final int FILE_CHOOSER_CSV = 522;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,14 +96,120 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_export_table, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.btn_export_table:
+                exportQueryData();
+                return true;
         }
         return false;
+    }
+
+    public void exportQueryData() {
+        showSelectResultsDialog();
+    }
+
+    @Subscribe
+    public void onResultCountResponseEvent(RunMapleEvent.ResultResponseEvent event) {
+        this.resultsHtml = event.docs;
+    }
+
+    public void showSelectResultsDialog() {
+        bus.post(new RunMapleEvent.ResultRequestEvent());
+        if (resultsHtml == null || resultsHtml.isEmpty()) {
+            return;
+        }
+        selectedResults = new ArrayList<>();
+        final String[] items = new String[resultsHtml.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = "Resultado " + (i + 1);
+        }
+
+        if (resultsHtml.size() > 1) {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Resultados a exportar")
+                    .setMultiChoiceItems(items, null, (dialogInterface, indexSelected, isChecked) -> {
+                        if (isChecked) {
+                            selectedResults.add(indexSelected);
+                        } else if (selectedResults.contains(indexSelected)) {
+                            selectedResults.remove(indexSelected);
+                        }
+                    })
+                    .setPositiveButton("Siguiente", (dialogInterface, id) -> {
+                        if (!selectedResults.isEmpty()) {
+                            showSelectFormatDialog();
+                        } else {
+                            Toast.makeText(this, "Se debe elegir al menos un resultado a exportar.", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancelar", (dialogInterface, id) -> {
+                    }).create();
+            dialog.show();
+        } else { //si hay solo un resultado, vamos directamente al dialogo de elegir formato
+            selectedResults.add(1);
+            showSelectFormatDialog();
+        }
+    }
+
+    public void showSelectFormatDialog() {
+        String[] items = {"JSON", "CSV"};
+        FinalValue<String> selectedItem = new FinalValue<>("JSON");
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Formato a exportar")
+                .setSingleChoiceItems(items, 0, (dialogInterface, which) -> selectedItem.set(items[which]))
+                .setPositiveButton("OK", (dialogInterface, id) -> showSelectDirectoryDialog(selectedItem.getValue()))
+                .setNegativeButton("Cancelar", (dialogInterface, id) -> {
+                }).create();
+        dialog.show();
+    }
+
+    public void showSelectDirectoryDialog(String format) {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        i.addCategory(Intent.CATEGORY_DEFAULT);
+        Intent fileChooserIntent = Intent.createChooser(i, "Elije un directorio");
+        startActivityForResult(fileChooserIntent, format.equals("JSON") ? FILE_CHOOSER_JSON : FILE_CHOOSER_CSV);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FILE_CHOOSER_JSON:
+                if (data != null) {
+                    prepareResultsFile(DocumentFile.fromTreeUri(this, data.getData()), FILE_CHOOSER_JSON);
+                }
+                break;
+            case FILE_CHOOSER_CSV:
+                if (data != null) {
+                    prepareResultsFile(DocumentFile.fromTreeUri(this, data.getData()), FILE_CHOOSER_CSV);
+                }
+                break;
+        }
+    }
+
+    public void prepareResultsFile(DocumentFile file, int format) {
+        Map<Integer, HTMLDoc> selectedDocs = new HashMap<>();
+        for (int i = 0; i < selectedResults.size(); i++) {
+            int selectedResult = selectedResults.get(i);
+            selectedDocs.put(selectedResult + 1, resultsHtml.get(selectedResult));
+        }
+        switch (format) {
+            case FILE_CHOOSER_JSON:
+                DataUtils.htmlTablesToJSON(this, selectedDocs, file);
+                break;
+            case FILE_CHOOSER_CSV:
+                DataUtils.htmlTablesToCSV(this, selectedDocs, file);
+                break;
+        }
     }
 
     @Override

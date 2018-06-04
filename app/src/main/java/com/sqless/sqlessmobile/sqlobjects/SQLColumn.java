@@ -81,7 +81,8 @@ public class SQLColumn extends SQLObject implements Iconable, SQLDroppable, SQLS
     }
 
     @Override
-    public String getSelectStatement() {
-        return "SELECT `" + getName() + "` FROM `" + parentName + "` LIMIT 200";
+    public String getSelectStatement(int limit) {
+        return "SELECT `" + getName() + "` FROM `"
+                + getParentName() + "`" + (limit == SQLSelectable.ALL ? "" : " LIMIT " + limit);
     }
 }

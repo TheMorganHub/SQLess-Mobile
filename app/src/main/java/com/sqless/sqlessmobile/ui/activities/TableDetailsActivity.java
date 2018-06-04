@@ -5,7 +5,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,7 +13,7 @@ import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerTableDetailsAdapter;
 import com.sqless.sqlessmobile.ui.busevents.tabledata.DataEvents;
-import com.sqless.sqlessmobile.ui.fragments.ExportTableFragment;
+import com.sqless.sqlessmobile.ui.fragments.ExportAsFormatSheetFragment;
 import com.sqless.sqlessmobile.utils.DataUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -62,15 +61,15 @@ public class TableDetailsActivity extends AppCompatActivity implements FragmentC
     }
 
     public void exportTableData() {
-        ExportTableFragment exportTableFragment = ExportTableFragment.newInstance();
-        Bundle bundle = new Bundle();
-        bundle.putString("file_name", ((SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA")).getTableName());
-        exportTableFragment.setArguments(bundle);
-        exportTableFragment.show(getSupportFragmentManager(), "export_table_data");
+        ExportAsFormatSheetFragment exportAsFormat = ExportAsFormatSheetFragment.newInstance();
+        exportAsFormat.show(getSupportFragmentManager(), "export_table_data");
     }
 
     @Subscribe
     public void onUriIsReadyEvent(DataEvents.URIIsReadyEvent event) {
+        if (!event.forActivity.equals(getClass().getName())) {
+            return;
+        }
         DocumentFile file = event.documentFile;
         if (event.eventType == DataEvents.URIIsReadyEvent.JSON_EVENT) {
             DataUtils.tableToJSON(this, (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA"), file);

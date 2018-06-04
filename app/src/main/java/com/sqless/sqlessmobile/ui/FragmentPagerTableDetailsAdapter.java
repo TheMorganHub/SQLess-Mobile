@@ -23,7 +23,6 @@ public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
         tableType = data.getInt("TABLE_TYPE");
     }
 
-    // This determines the fragment for each tab
     @Override
     public Fragment getItem(int position) {
         Fragment f;
@@ -36,22 +35,19 @@ public class FragmentPagerTableDetailsAdapter extends FragmentPagerAdapter {
             default:
                 f = AbstractFragment.newInstance(connectionData, TableHtmlFragment.class);
                 f.getArguments().putString("QUERY_TITLE", connectionData != null ? connectionData.getTableName() : "");
-                f.getArguments().putString("QUERY", connectionData != null ? "SELECT * FROM " + connectionData.getTableName() + " LIMIT 200" : null);
+                f.getArguments().putString("query_to_run", connectionData != null ? "SELECT * FROM " + connectionData.getTableName() + " LIMIT 200" : null);
                 break;
         }
         return f;
     }
 
-    // This determines the number of tabs
     @Override
     public int getCount() {
         return 2;
     }
 
-    // This determines the title for each tab
     @Override
     public CharSequence getPageTitle(int position) {
-        // Generate title based on item position
         switch (position) {
             case 0:
                 return "COLUMNAS";

@@ -31,7 +31,7 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
 
     @Override
     public void afterCreate() {
-        String queryContents = getArguments().getString("QUERY");
+        String queryContents = getArguments().getString("query_to_run");
         if (queryContents != null) {
             createHTMLTable(queryContents);
         }
@@ -70,7 +70,7 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
 
     @Override
     public void onRefresh() {
-        String queryContents = getArguments().getString("QUERY");
+        String queryContents = getArguments().getString("query_to_run");
         if (queryContents != null) {
             TextView tvError = fragmentView.findViewById(R.id.tv_table_html_error);
             WebView wv = fragmentView.findViewById(R.id.wv_table);

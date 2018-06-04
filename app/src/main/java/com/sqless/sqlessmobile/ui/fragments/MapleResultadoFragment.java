@@ -88,6 +88,11 @@ public class MapleResultadoFragment extends AbstractFragment {
         prepareUIForError(event.message, true);
     }
 
+    @Subscribe
+    public void onResultRequestEvent(RunMapleEvent.ResultRequestEvent event) {
+        bus.post(new RunMapleEvent.ResultResponseEvent(htmlResults));
+    }
+
     public void prepareUIForError(String errorMessage, boolean mapleError) {
         htmlResults = null;
         this.mapleError = mapleError;

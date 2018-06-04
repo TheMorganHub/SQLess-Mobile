@@ -26,7 +26,7 @@ public class QueryFragment extends AbstractFragment {
 
     @Override
     public void afterCreate() {
-        String sql = getArguments().getString("QUERY");
+        String sql = getArguments().getString("query_to_run");
         PrettifyHighlighter highlighter = new PrettifyHighlighter();
         String highlighted = highlighter.highlight("sql", sql);
         ((TextView) fragmentView.findViewById(R.id.tv_query_sql)).setText(Html.fromHtml(highlighted));

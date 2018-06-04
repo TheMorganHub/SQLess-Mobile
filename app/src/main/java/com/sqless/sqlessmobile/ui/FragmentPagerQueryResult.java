@@ -31,7 +31,7 @@ public class FragmentPagerQueryResult extends FragmentPagerAdapter {
                 break;
         }
         f.getArguments().putString("QUERY_TITLE", fragmentBundle.getString("QUERY_TITLE"));
-        f.getArguments().putString("QUERY", fragmentBundle.getString("QUERY"));
+        f.getArguments().putString("query_to_run", fragmentBundle.getString("query_to_run"));
         return f;
     }
 

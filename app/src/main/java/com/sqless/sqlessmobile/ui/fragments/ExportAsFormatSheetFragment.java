@@ -14,14 +14,14 @@ import com.sqless.sqlessmobile.ui.busevents.tabledata.DataEvents;
 
 import org.greenrobot.eventbus.EventBus;
 
-public class ExportTableFragment extends BottomSheetDialogFragment implements View.OnClickListener {
+public class ExportAsFormatSheetFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
     private static final int FILE_CHOOSER_JSON = 42;
     private static final int FILE_CHOOSER_CSV = 522;
     EventBus bus = EventBus.getDefault();
 
-    public static ExportTableFragment newInstance() {
-        return new ExportTableFragment();
+    public static ExportAsFormatSheetFragment newInstance() {
+        return new ExportAsFormatSheetFragment();
     }
 
     @Override
@@ -30,33 +30,29 @@ public class ExportTableFragment extends BottomSheetDialogFragment implements Vi
         view.findViewById(R.id.btn_sheet_json).setOnClickListener(this);
         view.findViewById(R.id.btn_sheet_csv).setOnClickListener(this);
         return view;
-
     }
 
     @Override
     public void onClick(View v) {
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         i.addCategory(Intent.CATEGORY_DEFAULT);
-        startActivityForResult(Intent.createChooser(i, "Choose a directory"), v.getId() == R.id.btn_sheet_json ? FILE_CHOOSER_JSON : FILE_CHOOSER_CSV);
+        startActivityForResult(Intent.createChooser(i, "Elije un directorio"), v.getId() == R.id.btn_sheet_json ? FILE_CHOOSER_JSON : FILE_CHOOSER_CSV);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String tableName = getArguments().getString("file_name");
         switch (requestCode) {
             case FILE_CHOOSER_JSON:
                 if (data != null) {
                     DocumentFile file = DocumentFile.fromTreeUri(getActivity(), data.getData());
-                    DocumentFile exportFile = file.createFile("text/json", tableName + ".json");
-                    bus.post(new DataEvents.URIIsReadyEvent(exportFile, DataEvents.URIIsReadyEvent.JSON_EVENT));
+                    bus.post(new DataEvents.URIIsReadyEvent(file, DataEvents.URIIsReadyEvent.JSON_EVENT, getActivity().getClass().getName()));
                     dismiss();
                 }
                 break;
             case FILE_CHOOSER_CSV:
                 if (data != null) {
                     DocumentFile file = DocumentFile.fromTreeUri(getActivity(), data.getData());
-                    DocumentFile exportFile = file.createFile("text/csv", tableName + ".csv");
-                    bus.post(new DataEvents.URIIsReadyEvent(exportFile, DataEvents.URIIsReadyEvent.CSV_EVENT));
+                    bus.post(new DataEvents.URIIsReadyEvent(file, DataEvents.URIIsReadyEvent.CSV_EVENT, getActivity().getClass().getName()));
                     dismiss();
                 }
                 break;

@@ -6,6 +6,13 @@ package com.sqless.sqlessmobile.utils;
 
 public class FinalValue<T> {
 
+    public FinalValue(T value) {
+        this.value = value;
+    }
+
+    public FinalValue() {
+    }
+
     private T value;
 
     public T getValue() {

@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +13,7 @@ import android.widget.ProgressBar;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
+import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 import com.sqless.sqlessmobile.ui.activities.QueryResultActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.Callback;
@@ -23,9 +25,9 @@ import java.util.List;
 /**
  * Un fragment que se encarga de mostrar columnas de vistas y tablas. Uno de los argumentos que
  * llevará este fragment es el de {@code TABLE_TYPE}. Si {@code TABLE_TYPE} es {@code TABLE},
- * la clase cargará las columnas llamando al método {@link SQLUtils#getColumns(SQLConnectionManager.ConnectionData, Callback, Callback)}.
+ * la clase cargará las columnas llamando al método {@link SQLUtils#getColumns(Activity, SQLConnectionManager.ConnectionData, Callback, Callback)} .
  * De lo contrario si {@code TABLE_TYPE} es {@code VIEW}, la clase cargará las columnas llamando
- * a {@link SQLUtils#getViewColumns(SQLConnectionManager.ConnectionData, Callback, Callback)}.
+ * a {@link SQLUtils#getViewColumns(Activity, SQLConnectionManager.ConnectionData, Callback, Callback)} .
  * Esta diferencia es necesaria ya que en el caso de columnas de tablas, es necesario traer PK y FK.
  * En Views solo necesitamos los nombres.
  */
@@ -140,7 +142,9 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
         Intent intent = new Intent(getContext(), QueryResultActivity.class);
         intent.putExtra("CONNECTION_DATA", connectionData);
         intent.putExtra("QUERY_TITLE", column.getParentName() + "." + column.getName());
-        intent.putExtra("QUERY", column.getSelectStatement());
+        intent.putExtra("query_to_run", column.getSelectStatement(200));
+        intent.putExtra("query_to_export", column.getSelectStatement(SQLSelectable.ALL));
+        intent.putExtra("result_name", column.getParentName() + "_" + column.getName());
         startActivity(intent);
     }
 }

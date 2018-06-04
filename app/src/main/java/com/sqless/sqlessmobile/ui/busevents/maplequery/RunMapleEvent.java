@@ -37,4 +37,18 @@ public class RunMapleEvent {
             this.message = message;
         }
     }
+
+    public static class ResultRequestEvent {
+
+        public ResultRequestEvent() {
+        }
+    }
+
+    public static class ResultResponseEvent {
+        public List<HTMLDoc> docs;
+
+        public ResultResponseEvent(List<HTMLDoc> docs) {
+            this.docs = docs;
+        }
+    }
 }

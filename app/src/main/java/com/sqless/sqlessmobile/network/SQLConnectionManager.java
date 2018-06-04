@@ -138,7 +138,8 @@ public class SQLConnectionManager {
         public Connection makeConnection(Activity context) {
             Connection conn = null;
             try {
-                conn = DriverManager.getConnection("jdbc:drizzle://" + host + ":" + port + "/" + database + "?connectTimeout=3&allowMultiQueries=true", username, password);
+                DriverManager.setLoginTimeout(5);
+                conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?allowMultiQueries=true", username, password);
             } catch (SQLException e) {
                 UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> UIUtils.showMessageDialog(context, "Error de conexión", "La conexión con el servidor MySQL no se pudo crear.\n" + e.getMessage()));
             }

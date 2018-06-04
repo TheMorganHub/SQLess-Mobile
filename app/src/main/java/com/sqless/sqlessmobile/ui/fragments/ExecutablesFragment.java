@@ -167,7 +167,9 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
         Intent intent = new Intent(getActivity(), QueryResultActivity.class);
         intent.putExtra("CONNECTION_DATA", connectionData);
         intent.putExtra("QUERY_TITLE", executable.getName());
-        intent.putExtra("QUERY", executable.getCallStatement());
+        intent.putExtra("query_to_run", executable.getCallStatement());
+        intent.putExtra("query_to_export", executable.getCallStatement());
+        intent.putExtra("result_name", executable.getName());
         startActivity(intent);
     }
 
