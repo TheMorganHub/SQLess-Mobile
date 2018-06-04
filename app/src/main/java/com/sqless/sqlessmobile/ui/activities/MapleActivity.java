@@ -156,7 +156,7 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
                     }).create();
             dialog.show();
         } else { //si hay solo un resultado, vamos directamente al dialogo de elegir formato
-            selectedResults.add(1);
+            selectedResults.add(0);
             showSelectFormatDialog();
         }
     }
