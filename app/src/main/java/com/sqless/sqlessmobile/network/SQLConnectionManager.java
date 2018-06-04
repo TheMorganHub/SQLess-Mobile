@@ -50,7 +50,8 @@ public class SQLConnectionManager {
             layProgress.setVisibility(View.VISIBLE);
         }
         Thread conTestThread = new Thread(() -> {
-            try (Connection testCon = DriverManager.getConnection("jdbc:drizzle://" + hostName + ":" + port + "/mysql?connectTimeout=3", username, password)) {
+            DriverManager.setLoginTimeout(5);
+            try (Connection testCon = DriverManager.getConnection("jdbc:mysql://" + hostName + ":" + port + "/mysql", username, password)) {
                 lastSuccessful = new ConnectionData(hostName, port, "mysql", username, password);
 
                 SQLUtils.getDatabaseNames((Activity) v.getContext(), lastSuccessful, names -> {
