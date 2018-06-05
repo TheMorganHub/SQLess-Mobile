@@ -41,9 +41,9 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
         setContentView(R.layout.activity_create_table);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        newTable = savedInstanceState == null ? new SQLTable("") : (SQLTable) savedInstanceState.getSerializable("NEW_TABLE");
-        connectionData = (SQLConnectionManager.ConnectionData) (savedInstanceState == null ? getIntent().getSerializableExtra("CONNECTION_DATA")
-                : savedInstanceState.getSerializable("CONNECTION_DATA"));
+        newTable = savedInstanceState == null ? new SQLTable("") : (SQLTable) savedInstanceState.getSerializable("new_table");
+        connectionData = (SQLConnectionManager.ConnectionData) (savedInstanceState == null ? getIntent().getSerializableExtra("connection_data")
+                : savedInstanceState.getSerializable("connection_data"));
 
         bus.register(this);
 
@@ -92,8 +92,8 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("NEW_TABLE", newTable);
-        outState.putSerializable("CONNECTION_DATA", connectionData);
+        outState.putSerializable("new_table", newTable);
+        outState.putSerializable("connection_data", connectionData);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
                 @Override
                 public void onConnectionKilled() {
                     UIUtils.invokeOnUIThreadIfNotDestroyed(CreateTableActivity.this, () -> {
-                        setResult(RESULT_OK, new Intent().putExtra("NEW_TABLE", newTable));
+                        setResult(RESULT_OK, new Intent().putExtra("new_table", newTable));
                         finish();
                     });
                 }

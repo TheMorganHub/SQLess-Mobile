@@ -93,9 +93,9 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Intent intent = new Intent(getContext(), TableDetailsActivity.class);
-        connectionData.setTableName(views.get(i).toString());
-        intent.putExtra("CONNECTION_DATA", connectionData);
-        intent.putExtra("TABLE_TYPE", ColumnsFragment.VIEW);
+        intent.putExtra("connection_data", connectionData);
+        intent.putExtra("table_type", ColumnsFragment.VIEW);
+        intent.putExtra("selectable", views.get(i));
         startActivity(intent);
     }
 

@@ -9,6 +9,8 @@ import android.widget.Toast;
 import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLSelectQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.sqlobjects.SQLObject;
+import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,13 +27,12 @@ import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 public class DataUtils {
-    public static void tableToJSON(Activity activity, SQLConnectionManager.ConnectionData connectionData, DocumentFile file) {
-        String tableName = connectionData.getTableName();
-        AsyncJSONWrite asyncJSONWrite = new AsyncJSONWrite(activity, connectionData, "SELECT * FROM `" + tableName + "`", file);
+    public static void tableToJSON(Activity activity, SQLConnectionManager.ConnectionData connectionData, SQLSelectable selectable, DocumentFile file) {
+        String tableName = ((SQLObject) selectable).getName();
+        AsyncJSONWrite asyncJSONWrite = new AsyncJSONWrite(activity, connectionData, selectable.getSelectStatement(SQLSelectable.ALL), file);
         asyncJSONWrite.execute(tableName);
     }
 
@@ -53,9 +54,9 @@ public class DataUtils {
         }
     }
 
-    public static void tableToCSV(Activity activity, SQLConnectionManager.ConnectionData connectionData, DocumentFile file) {
-        String tableName = connectionData.getTableName();
-        AsyncCSVWrite asyncCSVWrite = new AsyncCSVWrite(activity, connectionData, "SELECT * FROM `" + tableName + "`", file);
+    public static void tableToCSV(Activity activity, SQLConnectionManager.ConnectionData connectionData, SQLSelectable selectable, DocumentFile file) {
+        String tableName = ((SQLObject) selectable).getName();
+        AsyncCSVWrite asyncCSVWrite = new AsyncCSVWrite(activity, connectionData, selectable.getSelectStatement(SQLSelectable.ALL), file);
         asyncCSVWrite.execute(tableName);
     }
 

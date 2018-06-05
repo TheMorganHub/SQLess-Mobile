@@ -10,6 +10,7 @@ import android.view.MenuItem;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
+import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerTableDetailsAdapter;
 import com.sqless.sqlessmobile.ui.busevents.tabledata.DataEvents;
@@ -71,10 +72,12 @@ public class TableDetailsActivity extends AppCompatActivity implements FragmentC
             return;
         }
         DocumentFile file = event.documentFile;
+        SQLConnectionManager.ConnectionData connData = (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("connection_data");
+        SQLSelectable selectable = (SQLSelectable) getIntent().getSerializableExtra("selectable");
         if (event.eventType == DataEvents.URIIsReadyEvent.JSON_EVENT) {
-            DataUtils.tableToJSON(this, (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA"), file);
+            DataUtils.tableToJSON(this, connData, selectable, file);
         } else if (event.eventType == DataEvents.URIIsReadyEvent.CSV_EVENT) {
-            DataUtils.tableToCSV(this, (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA"), file);
+            DataUtils.tableToCSV(this, connData, selectable, file);
         }
     }
 

@@ -46,7 +46,7 @@ public class FragmentPagerCreateTableAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         AbstractFragment f;
-        SQLConnectionManager.ConnectionData connectionData = (SQLConnectionManager.ConnectionData) fragmentBundle.getSerializable("CONNECTION_DATA");
+        SQLConnectionManager.ConnectionData connectionData = (SQLConnectionManager.ConnectionData) fragmentBundle.getSerializable("connection_data");
         switch (position) {
             case 0:
                 f = AbstractFragment.newInstance(connectionData, CreateColumnsFragment.class);

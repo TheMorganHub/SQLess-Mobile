@@ -16,7 +16,7 @@ public class QueryFragment extends AbstractFragment {
 
     @Override
     protected String getTitle() {
-        return getArguments().getString("QUERY_TITLE");
+        return getArguments().getString("query_title");
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.sqless.sqlessmobile.sqlobjects;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable {
+public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable, SQLSelectable {
 
     private List<SQLColumn> columns;
     private List<SQLForeignKey> foreignKeys;
@@ -86,5 +86,10 @@ public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public String getSelectStatement(int limit) {
+        return "SELECT * FROM `" + getName() + "`" + (limit == SQLSelectable.ALL ? "" : " LIMIT " + limit);
     }
 }

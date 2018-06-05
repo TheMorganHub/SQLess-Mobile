@@ -44,7 +44,7 @@ public class DatabaseActionsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.nav_tables_fragment);
 
-        connectionData = (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA");
+        connectionData = (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("connection_data");
 
         View headerView = navigationView.getHeaderView(0);
         ((TextView) headerView.findViewById(R.id.nav_database_name)).setText(connectionData.database);
@@ -90,7 +90,7 @@ public class DatabaseActionsActivity extends AppCompatActivity
         } else if (id == R.id.nav_tables_maple) {
             DrawerLayout drawer = findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
-            startActivity(new Intent(this, MapleActivity.class).putExtra("CONNECTION_DATA", connectionData));
+            startActivity(new Intent(this, MapleActivity.class).putExtra("connection_data", connectionData));
             return true;
         }
         openFragment(fragment);

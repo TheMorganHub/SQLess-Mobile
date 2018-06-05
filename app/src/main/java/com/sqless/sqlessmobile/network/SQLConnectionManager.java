@@ -96,7 +96,6 @@ public class SQLConnectionManager {
         public String database;
         public String username;
         public String password;
-        private String tableName;
 
         public ConnectionData(long id, String host, String port, String database, String username, String password) {
             this(host, port, database, username, password);
@@ -114,14 +113,6 @@ public class SQLConnectionManager {
             this.database = database;
             this.username = username;
             this.password = password;
-        }
-
-        public void setTableName(String tableName) {
-            this.tableName = tableName;
-        }
-
-        public String getTableName() {
-            return tableName;
         }
 
         public void setDatabase(String database) {

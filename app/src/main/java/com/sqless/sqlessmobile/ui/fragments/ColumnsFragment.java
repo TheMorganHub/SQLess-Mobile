@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
+import com.sqless.sqlessmobile.sqlobjects.SQLObject;
 import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 import com.sqless.sqlessmobile.ui.activities.QueryResultActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
@@ -24,10 +25,10 @@ import java.util.List;
 
 /**
  * Un fragment que se encarga de mostrar columnas de vistas y tablas. Uno de los argumentos que
- * llevará este fragment es el de {@code TABLE_TYPE}. Si {@code TABLE_TYPE} es {@code TABLE},
- * la clase cargará las columnas llamando al método {@link SQLUtils#getColumns(Activity, SQLConnectionManager.ConnectionData, Callback, Callback)} .
- * De lo contrario si {@code TABLE_TYPE} es {@code VIEW}, la clase cargará las columnas llamando
- * a {@link SQLUtils#getViewColumns(Activity, SQLConnectionManager.ConnectionData, Callback, Callback)} .
+ * llevará este fragment es el de {@code table_type}. Si {@code table_type} es {@code TABLE},
+ * la clase cargará las columnas llamando al método {@link SQLUtils#getColumns(Activity, SQLObject, SQLConnectionManager.ConnectionData, Callback, Callback)} .
+ * De lo contrario si {@code table_type} es {@code VIEW}, la clase cargará las columnas llamando
+ * a {@link SQLUtils#getViewColumns(Activity, SQLObject, SQLConnectionManager.ConnectionData, Callback, Callback)} .
  * Esta diferencia es necesaria ya que en el caso de columnas de tablas, es necesario traer PK y FK.
  * En Views solo necesitamos los nombres.
  */
@@ -47,16 +48,18 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     public void afterCreate() {
-        final int tableType = getArguments().getInt("TABLE_TYPE", -1);
+        final int tableType = getArguments().getInt("table_type", -1);
         progressBar = fragmentView.findViewById(R.id.column_progress_bar);
+        SQLObject selectable = (SQLObject) getArguments().getSerializable("selectable");
+
         if (columnsAdapter == null) { //el fragment está siendo cargado por primera vez
             progressBar.setVisibility(View.VISIBLE);
             switch (tableType) {
                 case TABLE:
-                    SQLUtils.getColumns(getActivity(), connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getColumns(getActivity(), selectable, connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
                 case VIEW:
-                    SQLUtils.getViewColumns(getActivity(), connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getViewColumns(getActivity(), selectable, connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
                     break;
             }
         } else { //ya existe una instancia del fragment
@@ -66,13 +69,14 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     public void onRefresh() {
-        final int tableType = getArguments().getInt("TABLE_TYPE", -1);
+        final int tableType = getArguments().getInt("table_type", -1);
+        SQLObject selectable = (SQLObject) getArguments().getSerializable("selectable");
         switch (tableType) {
             case TABLE:
-                SQLUtils.getColumns(getActivity(), connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                SQLUtils.getColumns(getActivity(), selectable, connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
                 break;
             case VIEW:
-                SQLUtils.getViewColumns(getActivity(), connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
+                SQLUtils.getViewColumns(getActivity(), selectable, connectionData, this::onColumnsRefresh, err -> swipeRefreshLayout.setRefreshing(false));
                 break;
         }
     }
@@ -102,7 +106,8 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     protected String getTitle() {
-        return connectionData != null ? connectionData.getTableName() : "";
+        SQLObject selectable = (SQLObject) getArguments().getSerializable("selectable");
+        return selectable != null ? selectable.getName() : "";
     }
 
     @Override
@@ -112,7 +117,7 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if (getArguments().getInt("TABLE_TYPE", -1) != VIEW) {
+        if (getArguments().getInt("table_type", -1) != VIEW) {
             FinalValue<AlertDialog> dialog = new FinalValue<>();
             AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
             actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
@@ -140,8 +145,8 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         SQLColumn column = columns.get(position);
         Intent intent = new Intent(getContext(), QueryResultActivity.class);
-        intent.putExtra("CONNECTION_DATA", connectionData);
-        intent.putExtra("QUERY_TITLE", column.getParentName() + "." + column.getName());
+        intent.putExtra("connection_data", connectionData);
+        intent.putExtra("query_title", column.getParentName() + "." + column.getName());
         intent.putExtra("query_to_run", column.getSelectStatement(200));
         intent.putExtra("query_to_export", column.getSelectStatement(SQLSelectable.ALL));
         intent.putExtra("result_name", column.getParentName() + "_" + column.getName());

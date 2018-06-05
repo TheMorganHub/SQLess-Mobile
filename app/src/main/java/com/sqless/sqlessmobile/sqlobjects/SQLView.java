@@ -1,6 +1,6 @@
 package com.sqless.sqlessmobile.sqlobjects;
 
-public class SQLView extends SQLObject implements SQLDroppable {
+public class SQLView extends SQLObject implements SQLDroppable, SQLSelectable {
 
     public SQLView(String name) {
         super(name);
@@ -14,5 +14,10 @@ public class SQLView extends SQLObject implements SQLDroppable {
     @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public String getSelectStatement(int limit) {
+        return "SELECT * FROM `" + getName() + "`" + (limit == SQLSelectable.ALL ? "" : " LIMIT " + limit);
     }
 }

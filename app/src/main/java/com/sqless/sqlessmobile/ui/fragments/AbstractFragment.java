@@ -34,7 +34,7 @@ public abstract class AbstractFragment extends Fragment {
             fragment = clazz.newInstance();
             fragment.setFragmentClass(clazz);
             Bundle args = new Bundle();
-            args.putSerializable("CONNECTION_DATA", connectionData);
+            args.putSerializable("connection_data", connectionData);
             fragment.setArguments(args);
         } catch (Exception e) {
             Log.e(AbstractFragment.class.getSimpleName(), "Could not create fragment. Error: " + e.getMessage());
@@ -77,7 +77,7 @@ public abstract class AbstractFragment extends Fragment {
         setRetainInstance(true);
 
         if (getArguments() != null) {
-            connectionData = (SQLConnectionManager.ConnectionData) getArguments().getSerializable("CONNECTION_DATA");
+            connectionData = (SQLConnectionManager.ConnectionData) getArguments().getSerializable("connection_data");
             mListener.getTitleFromFragment(getTitle());
         }
     }

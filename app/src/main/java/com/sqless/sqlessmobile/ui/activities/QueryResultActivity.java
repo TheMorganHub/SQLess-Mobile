@@ -57,7 +57,7 @@ public class QueryResultActivity extends AppCompatActivity implements FragmentCo
         DocumentFile file = event.documentFile;
         String query = getIntent().getStringExtra("query_to_export");
         String resultName = getIntent().getStringExtra("result_name");
-        SQLConnectionManager.ConnectionData connectionData = (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("CONNECTION_DATA");
+        SQLConnectionManager.ConnectionData connectionData = (SQLConnectionManager.ConnectionData) getIntent().getSerializableExtra("connection_data");
         if (event.eventType == DataEvents.URIIsReadyEvent.JSON_EVENT) {
             DataUtils.resultToJSON(this, connectionData, query, resultName, file);
         } else if (event.eventType == DataEvents.URIIsReadyEvent.CSV_EVENT) {

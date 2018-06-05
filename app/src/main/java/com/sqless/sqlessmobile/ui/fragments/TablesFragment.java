@@ -89,7 +89,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
 
     public void actionCreateTable() {
         Intent intent = new Intent(getContext(), CreateTableActivity.class);
-        intent.putExtra("CONNECTION_DATA", connectionData);
+        intent.putExtra("connection_data", connectionData);
         startActivityForResult(intent, TABLE_CREATION_RESULT);
     }
 
@@ -115,7 +115,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         switch (requestCode) {
             case TABLE_CREATION_RESULT:
                 if (resultCode == Activity.RESULT_OK) {
-                    SQLTable newTable = (SQLTable) data.getSerializableExtra("NEW_TABLE");
+                    SQLTable newTable = (SQLTable) data.getSerializableExtra("new_table");
                     tables.add(newTable);
                     tablesAdapter.notifyDataSetChanged();
                     fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
@@ -133,9 +133,9 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Intent intent = new Intent(getContext(), TableDetailsActivity.class);
-        connectionData.setTableName(tables.get(i).getName());
-        intent.putExtra("CONNECTION_DATA", connectionData);
-        intent.putExtra("TABLE_TYPE", ColumnsFragment.TABLE);
+        intent.putExtra("connection_data", connectionData);
+        intent.putExtra("table_type", ColumnsFragment.TABLE);
+        intent.putExtra("selectable", tables.get(i));
         startActivity(intent);
     }
 

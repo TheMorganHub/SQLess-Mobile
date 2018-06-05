@@ -13,9 +13,11 @@ import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.sqlobjects.SQLDroppable;
 import com.sqless.sqlessmobile.sqlobjects.SQLExecutable;
 import com.sqless.sqlessmobile.sqlobjects.SQLFunction;
+import com.sqless.sqlessmobile.sqlobjects.SQLObject;
 import com.sqless.sqlessmobile.sqlobjects.SQLParameter;
 import com.sqless.sqlessmobile.sqlobjects.SQLProcedure;
 import com.sqless.sqlessmobile.sqlobjects.SQLRenameable;
+import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.sqlobjects.SQLView;
 
@@ -177,16 +179,16 @@ public class SQLUtils {
         columnNamesQuery.exec();
     }
 
-    public static void getViewColumns(Activity context, SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
+    public static void getViewColumns(Activity context, SQLObject selectable, SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery viewColumnsQuery = new SQLSelectQuery(context, connectionData, "SELECT * FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = " +
-                "'" + connectionData.database + "' AND TABLE_NAME = '" + connectionData.getTableName() + "'") {
+                "'" + connectionData.database + "' AND TABLE_NAME = '" + selectable.getName() + "'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<SQLColumn> columns = new ArrayList<>();
                 while (rs.next()) {
                     String colName = rs.getString("COLUMN_NAME");
                     String dataType = rs.getString("DATA_TYPE");
-                    SQLColumn column = new SQLColumn(connectionData.getTableName(), colName, dataType);
+                    SQLColumn column = new SQLColumn(selectable.getName(), colName, dataType);
                     columns.add(column);
                 }
                 UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> callbackSuccess.exec(columns));
@@ -200,17 +202,17 @@ public class SQLUtils {
         viewColumnsQuery.exec();
     }
 
-    public static void getColumns(Activity context, SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
+    public static void getColumns(Activity context, SQLObject sqlTable, SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery columnsQuery = new SQLSelectQuery(context, connectionData,
                 "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = '" + connectionData.database
-                        + "' AND TABLE_NAME = '" + connectionData.getTableName() + "'") {
+                        + "' AND TABLE_NAME = '" + sqlTable.getName() + "'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<SQLColumn> columns = new ArrayList<>();
                 while (rs.next()) {
                     String colName = rs.getString("COLUMN_NAME");
                     String dataType = rs.getString("DATA_TYPE");
-                    SQLColumn column = new SQLColumn(connectionData.getTableName(), colName, dataType);
+                    SQLColumn column = new SQLColumn(sqlTable.getName(), colName, dataType);
                     column.setIsPK(rs.getString("COLUMN_KEY").equals("PRI"));
                     columns.add(column);
                 }
@@ -221,7 +223,7 @@ public class SQLUtils {
                         "LEFT JOIN information_schema.REFERENTIAL_CONSTRAINTS r ON r.CONSTRAINT_NAME = k.CONSTRAINT_NAME\n" +
                         "WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY'\n" +
                         "AND i.TABLE_SCHEMA = '" + connectionData.database + "'\n" +
-                        "AND i.TABLE_NAME = '" + connectionData.getTableName() + "';", false) {
+                        "AND i.TABLE_NAME = '" + sqlTable.getName() + "';", false) {
                     @Override
                     public void onSuccess(ResultSet rs) throws SQLException {
                         while (rs.next()) {

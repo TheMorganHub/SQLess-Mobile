@@ -21,7 +21,7 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
 
     @Override
     protected String getTitle() {
-        return getArguments().getString("QUERY_TITLE");
+        return getArguments().getString("query_title");
     }
 
     @Override

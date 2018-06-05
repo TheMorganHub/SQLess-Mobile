@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         SQLConnectionManager.ConnectionData selectedItem = adapter.getItem(i);
         Intent intent = new Intent(this, DatabaseActionsActivity.class);
-        intent.putExtra("CONNECTION_DATA", selectedItem);
+        intent.putExtra("connection_data", selectedItem);
         startActivity(intent);
     }
 
