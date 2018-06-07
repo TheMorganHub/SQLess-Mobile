@@ -8,11 +8,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.ui.busevents.tabledata.DataEvents;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private SwipeRefreshLayout swipeRefreshLayout;
+    EventBus bus = EventBus.getDefault();
 
 
     public TableHtmlFragment() {
@@ -31,6 +36,9 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
 
     @Override
     public void afterCreate() {
+        if (!bus.isRegistered(this)) {
+            bus.register(this);
+        }
         String queryContents = getArguments().getString("query_to_run");
         if (queryContents != null) {
             createHTMLTable(queryContents);
@@ -68,8 +76,17 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
         swipeRefreshLayout.setOnRefreshListener(this);
     }
 
+    @Subscribe
+    public void onRefreshDataRequestEvent(DataEvents.RefreshDataRequestEvent event) {
+        doRefresh();
+    }
+
     @Override
     public void onRefresh() {
+        doRefresh();
+    }
+
+    private void doRefresh() {
         String queryContents = getArguments().getString("query_to_run");
         if (queryContents != null) {
             TextView tvError = fragmentView.findViewById(R.id.tv_table_html_error);
@@ -88,6 +105,14 @@ public class TableHtmlFragment extends AbstractFragment implements SwipeRefreshL
                         Log.e(getClass().getSimpleName(), err);
                         swipeRefreshLayout.setRefreshing(false);
                     });
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (bus.isRegistered(this)) {
+            bus.unregister(this);
         }
     }
 }

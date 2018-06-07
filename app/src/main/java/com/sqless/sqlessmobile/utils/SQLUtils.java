@@ -1,7 +1,6 @@
 package com.sqless.sqlessmobile.utils;
 
 import android.app.Activity;
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -17,7 +16,6 @@ import com.sqless.sqlessmobile.sqlobjects.SQLObject;
 import com.sqless.sqlessmobile.sqlobjects.SQLParameter;
 import com.sqless.sqlessmobile.sqlobjects.SQLProcedure;
 import com.sqless.sqlessmobile.sqlobjects.SQLRenameable;
-import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.sqlobjects.SQLView;
 
@@ -27,6 +25,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,6 +94,22 @@ public class SQLUtils {
         }
         String replaced = sql.replaceAll(TextUtils.join("|", delimitersToReplace), ";");
         return replaced.replaceAll("DELIMITER *(\\S*)", "");
+    }
+
+    public static void insertIntoTable(Activity context, SQLConnectionManager.ConnectionData connectionData, SQLTable sqlTable, Map<String, String> data,
+                                       Runnable callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery insertIntoQuery = new SQLUpdateQuery(context, connectionData, sqlTable.getInsertIntoStatement(data)) {
+            @Override
+            public void onSuccess(int updateCount) {
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, callbackSuccess);
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> callbackFailure.exec(errMessage));
+            }
+        };
+        insertIntoQuery.exec();
     }
 
     /**

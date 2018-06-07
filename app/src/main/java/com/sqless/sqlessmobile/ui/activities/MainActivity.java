@@ -1,8 +1,8 @@
 package com.sqless.sqlessmobile.ui.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,38 +12,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.HelperDB;
 import com.sqless.sqlessmobile.network.GoogleTokenManager;
-import com.sqless.sqlessmobile.network.PostRequest;
-import com.sqless.sqlessmobile.network.RestRequest;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewDBConnectionAdapter;
-import com.sqless.sqlessmobile.ui.adapters.listview.ListViewSubtituladoAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.List;
 
-import us.monoid.web.Resty;
-
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
-
 
     private AlertDialog activeDialog;
     private List<SQLConnectionManager.ConnectionData> connectionDataList;
@@ -77,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void signInSilently() {
-        GoogleTokenManager.getInstance().silentSignIn(this, account -> Log.i("MainActivity", "Silent sign in with id token " + account.getIdToken()));
+        GoogleTokenManager.getInstance().silentSignIn(this, account -> Log.i("MainActivity", "Silent sign in with id token."));
     }
 
     public void createConnectionDialog(SQLConnectionManager.ConnectionData savedConnectionData) {
@@ -98,24 +84,33 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             dbSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{savedConnectionData.database}));
         }
 
-        viewInflated.findViewById(R.id.btn_test).setOnClickListener(view -> {
+        dialogBuilder
+                .setNeutralButton("Test", null)
+                .setPositiveButton("Guardar", null);
+        dialogBuilder.setTitle(update ? "Editar conexión" : "Nueva conexión");
+        dialogBuilder.setView(viewInflated);
+        activeDialog = dialogBuilder.show();
+
+        Button neutralButtonTest = activeDialog.getButton(DialogInterface.BUTTON_NEUTRAL);
+        Button positiveButtonGuardar = activeDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        neutralButtonTest.setOnClickListener(v -> {
             String host = txtConHost.getText().toString();
             String port = txtConPort.getText().toString();
             String username = txtConUsername.getText().toString();
             String password = txtConPassword.getText().toString();
             SQLConnectionManager.getInstance().testConnection(viewInflated, username, password, host, port, connectionData -> {
-                viewInflated.findViewById(R.id.btn_save).setEnabled(true);
+                activeDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
                 Toast.makeText(this, "La prueba de conexión fue exitosa", Toast.LENGTH_SHORT).show();
                 if (update) {
                     UIUtils.selectSpinnerItemByValue(dbSpinner, savedConnectionData.database);
                 }
             }, errorCode -> {
-                viewInflated.findViewById(R.id.btn_save).setEnabled(false);
+                positiveButtonGuardar.setEnabled(false);
                 viewInflated.findViewById(R.id.spinner_dbs).setVisibility(View.INVISIBLE);
                 Toast.makeText(this, "La prueba de conexión falló", Toast.LENGTH_SHORT).show();
             });
         });
-        viewInflated.findViewById(R.id.btn_save).setOnClickListener(view -> {
+        positiveButtonGuardar.setOnClickListener(v -> {
             SQLConnectionManager.ConnectionData lastSuccessful = SQLConnectionManager.getInstance().getLastSuccessful();
             lastSuccessful.setDatabase(dbSpinner.getSelectedItem().toString());
             activeDialog.dismiss();
@@ -126,9 +121,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 saveConnection(lastSuccessful);
             }
         });
-        dialogBuilder.setTitle(update ? "Editar conexión" : "Nueva conexión");
-        dialogBuilder.setView(viewInflated);
-        activeDialog = dialogBuilder.show();
+        positiveButtonGuardar.setEnabled(false);
     }
 
     public void updateConnection(SQLConnectionManager.ConnectionData connectionData) {

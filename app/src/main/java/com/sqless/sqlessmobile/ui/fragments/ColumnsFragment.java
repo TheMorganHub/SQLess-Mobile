@@ -17,9 +17,13 @@ import com.sqless.sqlessmobile.sqlobjects.SQLObject;
 import com.sqless.sqlessmobile.sqlobjects.SQLSelectable;
 import com.sqless.sqlessmobile.ui.activities.QueryResultActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
+import com.sqless.sqlessmobile.ui.busevents.tabledata.DataEvents;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -41,6 +45,7 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
     public static final int TABLE = 632;
     public static final int VIEW = 865;
     private SwipeRefreshLayout swipeRefreshLayout;
+    EventBus bus = EventBus.getDefault();
 
     public ColumnsFragment() {
         // Required empty public constructor
@@ -48,6 +53,9 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     public void afterCreate() {
+        if (!bus.isRegistered(this)) {
+            bus.register(this);
+        }
         final int tableType = getArguments().getInt("table_type", -1);
         progressBar = fragmentView.findViewById(R.id.column_progress_bar);
         SQLObject selectable = (SQLObject) getArguments().getSerializable("selectable");
@@ -65,6 +73,19 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
         } else { //ya existe una instancia del fragment
             lv_columnas.setAdapter(columnsAdapter);
         }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (bus.isRegistered(this)) {
+            bus.unregister(this);
+        }
+    }
+
+    @Subscribe
+    public void onColumnsRequestEvent(DataEvents.TableColumnsRequestEvent event) {
+        bus.post(new DataEvents.TableColumnsResponseEvent(columns));
     }
 
     @Override

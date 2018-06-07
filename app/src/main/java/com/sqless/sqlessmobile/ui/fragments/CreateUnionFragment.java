@@ -1,5 +1,6 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
+import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +28,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateUnionFragment extends AbstractFragment implements View.OnClickListener, AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener {
+public class CreateUnionFragment extends AbstractFragment implements AdapterView.OnItemSelectedListener, AdapterView.OnItemLongClickListener {
 
     private List<SQLForeignKey> foreignKeys;
     private ListViewImageAdapter<SQLForeignKey> adapter;
@@ -41,7 +42,6 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
     public CreateUnionFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     protected String getTitle() {
@@ -73,8 +73,7 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
         View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.new_fk_dialog, fragmentView.findViewById(android.R.id.content), false);
-        Button btnCrear = viewInflated.findViewById(R.id.btn_create_fk_confirm);
-        btnCrear.setOnClickListener(this);
+        dialogBuilder.setPositiveButton("Crear", null);
 
         if (columns != null) {
             Spinner sp = viewInflated.findViewById(R.id.sp_fk_col_name);
@@ -85,6 +84,8 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
         dialogBuilder.setView(viewInflated);
         dialogBuilder.setTitle("Nueva FK");
         activeDialog = dialogBuilder.show();
+        Button positiveButtonCrear = activeDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButtonCrear.setOnClickListener(v -> doCreateFK(viewInflated));
 
         Spinner tablesSpinner = viewInflated.findViewById(R.id.sp_fk_ref_table);
 
@@ -115,16 +116,14 @@ public class CreateUnionFragment extends AbstractFragment implements View.OnClic
         createNewFKDialog();
     }
 
-    @Override
-    public void onClick(View view) {
-        View inflatedView = view.getRootView();
-        String fkNombre = ((EditText) inflatedView.findViewById(R.id.txt_fk_name)).getText().toString();
-        Object objFkColumn = ((Spinner) inflatedView.findViewById(R.id.sp_fk_col_name)).getSelectedItem();
-        Object objFkRefTableName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_table)).getSelectedItem();
-        Object objRefColName = ((Spinner) inflatedView.findViewById(R.id.sp_fk_ref_col)).getSelectedItem();
+    public void doCreateFK(View dialogView) {
+        String fkNombre = ((EditText) dialogView.findViewById(R.id.txt_fk_name)).getText().toString();
+        Object objFkColumn = ((Spinner) dialogView.findViewById(R.id.sp_fk_col_name)).getSelectedItem();
+        Object objFkRefTableName = ((Spinner) dialogView.findViewById(R.id.sp_fk_ref_table)).getSelectedItem();
+        Object objRefColName = ((Spinner) dialogView.findViewById(R.id.sp_fk_ref_col)).getSelectedItem();
 
         if (fkNombre.isEmpty() || objFkColumn == null || objFkRefTableName == null || objRefColName == null) {
-            Toast.makeText(view.getContext(), "Ninguno de los campos puede estar vacío", Toast.LENGTH_SHORT).show();
+            Toast.makeText(dialogView.getContext(), "Ninguno de los campos puede estar vacío", Toast.LENGTH_SHORT).show();
             return;
         }
 

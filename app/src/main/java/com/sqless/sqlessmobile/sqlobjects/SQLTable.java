@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.sqlobjects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable, SQLSelectable {
 
@@ -12,6 +13,10 @@ public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable, 
         super(nombre);
         columns = new ArrayList<>();
         foreignKeys = new ArrayList<>();
+    }
+
+    public void setColumns(List<SQLColumn> columns) {
+        this.columns = columns;
     }
 
     public void addColumn(SQLColumn column) {
@@ -81,6 +86,32 @@ public class SQLTable extends SQLObject implements SQLDroppable, SQLRenameable, 
     @Override
     public String getRenameStatement(String newName) {
         return "RENAME TABLE `" + getName() + "` to `" + newName + "`";
+    }
+
+    public String getInsertIntoStatement(Map<String, String> columnDataPairs) {
+        StringBuilder stmtBuilder = new StringBuilder("INSERT INTO `" + getName() + "`");
+        StringBuilder colBuilder = new StringBuilder("(");
+        StringBuilder valueBuilder = new StringBuilder("VALUES(");
+        boolean first = true;
+        for (Map.Entry<String, String> dataPair : columnDataPairs.entrySet()) {
+            String columnName = "`" + dataPair.getKey() + "`";
+            String columnData = "'" + dataPair.getValue() + "'";
+            if (first) {
+                colBuilder.append(columnName);
+            } else {
+                colBuilder.append(",").append(columnName);
+            }
+            if (first) {
+                valueBuilder.append(columnData);
+            } else {
+                valueBuilder.append(",").append(columnData);
+            }
+            first = false;
+        }
+        valueBuilder.append(")");
+        colBuilder.append(") ");
+        stmtBuilder.append(colBuilder).append(valueBuilder);
+        return stmtBuilder.toString();
     }
 
     @Override

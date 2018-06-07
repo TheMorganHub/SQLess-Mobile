@@ -5,7 +5,6 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -22,7 +21,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateColumnsFragment extends AbstractFragment implements View.OnClickListener, AdapterView.OnItemLongClickListener {
+public class CreateColumnsFragment extends AbstractFragment implements AdapterView.OnItemLongClickListener {
 
     private List<SQLColumn> sqlColumns;
     private ListViewColumnDetailsAdapter adapter;
@@ -54,13 +53,11 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
         fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(sqlColumns.isEmpty() ? View.VISIBLE : View.INVISIBLE);
     }
 
-    @Override
-    public void onClick(View view) {
-        View inflatedView = view.getRootView();
-        String nombre = ((TextView) inflatedView.findViewById(R.id.txt_create_table_col_name)).getText().toString();
-        String dataType = ((Spinner) inflatedView.findViewById(R.id.sp_create_table_col_datatype)).getSelectedItem().toString();
-        boolean isPk = ((Switch) inflatedView.findViewById(R.id.switch_pk)).isChecked();
-        boolean nullable = ((Switch) inflatedView.findViewById(R.id.switch_nullable)).isChecked();
+    public void doCreateColummn(View dialogView) {
+        String nombre = ((TextView) dialogView.findViewById(R.id.txt_create_table_col_name)).getText().toString();
+        String dataType = ((Spinner) dialogView.findViewById(R.id.sp_create_table_col_datatype)).getSelectedItem().toString();
+        boolean isPk = ((Switch) dialogView.findViewById(R.id.switch_pk)).isChecked();
+        boolean nullable = ((Switch) dialogView.findViewById(R.id.switch_nullable)).isChecked();
         SQLColumn newColumn = new SQLColumn("", nombre, dataType, isPk, nullable);
         sqlColumns.add(newColumn);
         adapter.notifyDataSetChanged();
@@ -76,8 +73,7 @@ public class CreateColumnsFragment extends AbstractFragment implements View.OnCl
     public void createNewColumnDialog() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
         View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.new_column_dialog, fragmentView.findViewById(android.R.id.content), false);
-        Button btnCrear = viewInflated.findViewById(R.id.btn_create_column_confirm);
-        btnCrear.setOnClickListener(this);
+        dialogBuilder.setPositiveButton("Crear", (dialog, which) -> doCreateColummn(viewInflated));
 
         dialogBuilder.setView(viewInflated);
         dialogBuilder.setTitle("Nueva columna");
