@@ -3,8 +3,8 @@ package com.sqless.sqlessmobile.ui.fragments;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
-
 import android.webkit.WebViewClient;
 
 import com.sqless.sqlessmobile.R;
@@ -18,11 +18,7 @@ import com.sqless.sqlessmobile.utils.SQLUtils;
 import com.sqless.sqlessmobile.utils.TextUtils;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.greenrobot.eventbus.EventBus;
-
-import us.monoid.json.JSONObject;
-import us.monoid.web.Resty;
 
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
@@ -31,12 +27,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.monoid.json.JSONObject;
+import us.monoid.web.Resty;
+
 public class MapleCrearFragment extends AbstractFragment {
 
     private WebView editorWebView;
-    private String value = "";
     EventBus bus = EventBus.getDefault();
-
+    private JSInterface jsInterface;
 
     public MapleCrearFragment() {
         // Required empty public constructor
@@ -56,6 +54,11 @@ public class MapleCrearFragment extends AbstractFragment {
     @Override
     public void afterCreate() {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        WebView editorWebView = fragmentView.findViewById(R.id.wv_editor);
+        if (jsInterface == null) {
+            jsInterface = new JSInterface();
+        }
+        editorWebView.addJavascriptInterface(jsInterface, "jsInterface");
         loadHTMLEditor();
     }
 
@@ -64,7 +67,7 @@ public class MapleCrearFragment extends AbstractFragment {
         editorWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                editorWebView.evaluateJavascript("setValue(\"" + TextUtils.unEscapeString(value) + "\");", null);
+                editorWebView.evaluateJavascript("setValue(\"" + jsInterface.getEditorContent(true) + "\");", null);
             }
         });
         editorWebView.getSettings().setJavaScriptEnabled(true);
@@ -79,10 +82,7 @@ public class MapleCrearFragment extends AbstractFragment {
         }
         GoogleTokenManager.getInstance().silentSignIn(getActivity(), account -> {
             WebView editorWebView = fragmentView.findViewById(R.id.wv_editor);
-            editorWebView.evaluateJavascript("getValue();", value -> {
-                String mapleStatement = StringEscapeUtils.unescapeJava(value).replaceAll("\"", "");
-                doExecuteMaple(account.getIdToken(), mapleStatement);
-            });
+            editorWebView.evaluateJavascript("shareEditorContent();", n -> doExecuteMaple(account.getIdToken(), jsInterface.getEditorContent()));
         });
     }
 
@@ -117,11 +117,34 @@ public class MapleCrearFragment extends AbstractFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        editorWebView.evaluateJavascript("getValue();", value -> this.value = value.replaceAll("\"", ""));
+        editorWebView.evaluateJavascript("persistData();", n -> {
+        });
     }
 
     @Override
     protected void implementListeners(View containerView) {
+    }
+
+    private class JSInterface {
+
+        private String data;
+
+        public JSInterface() {
+            this.data = "";
+        }
+
+        @JavascriptInterface
+        public void setData(String data) {
+            this.data = data;
+        }
+
+        public String getEditorContent() {
+            return getEditorContent(false);
+        }
+
+        public String getEditorContent(boolean unescapeContent) {
+            return !unescapeContent ? data : TextUtils.unEscapeString(data);
+        }
     }
 
     static class RunMapleQuery extends AsyncTask<String, String, List<HTMLDoc>> {

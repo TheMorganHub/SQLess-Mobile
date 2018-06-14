@@ -32,8 +32,18 @@
         mode: "text/x-mysql"
     });
 
-    function getValue() {
-        return editor.getValue();
+    function androidKeyboardFix() {
+        var cursorLine = editor.getCursor()['line'];
+        editor.setCursor({line: cursorLine, ch: 0});
+    }
+
+    function shareEditorContent() {
+        androidKeyboardFix();
+        jsInterface.setData(editor.getValue());
+    }
+
+    function persistData() {
+        jsInterface.setData(editor.getValue());
     }
 
     function setValue(value) {
