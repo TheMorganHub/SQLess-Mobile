@@ -1,11 +1,11 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
-import android.text.Html;
 import android.view.View;
-import android.widget.TextView;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.sqless.sqlessmobile.R;
-import com.sqless.sqlessmobile.utils.PrettifyHighlighter;
+import com.sqless.sqlessmobile.utils.TextUtils;
 
 public class QueryFragment extends AbstractFragment {
 
@@ -27,9 +27,15 @@ public class QueryFragment extends AbstractFragment {
     @Override
     public void afterCreate() {
         String sql = getArguments().getString("query_to_run");
-        PrettifyHighlighter highlighter = new PrettifyHighlighter();
-        String highlighted = highlighter.highlight("sql", sql);
-        ((TextView) fragmentView.findViewById(R.id.tv_query_sql)).setText(Html.fromHtml(highlighted));
+        WebView wvQuery = fragmentView.findViewById(R.id.wv_query_sql);
+        wvQuery.getSettings().setJavaScriptEnabled(true);
+        wvQuery.loadUrl("file:///android_asset/editorhtml/readonly_editor.html");
+        wvQuery.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                wvQuery.evaluateJavascript("setValue(\"" + TextUtils.unEscapeString(sql) + "\");", null);
+            }
+        });
     }
 
     @Override

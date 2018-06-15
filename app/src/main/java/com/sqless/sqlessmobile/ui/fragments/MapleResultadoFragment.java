@@ -1,12 +1,10 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
-import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -15,12 +13,11 @@ import android.widget.TextView;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.busevents.maplequery.RunMapleEvent;
 import com.sqless.sqlessmobile.utils.HTMLDoc;
-import com.sqless.sqlessmobile.utils.PrettifyHighlighter;
+import com.sqless.sqlessmobile.utils.TextUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class MapleResultadoFragment extends AbstractFragment {
@@ -149,34 +146,18 @@ public class MapleResultadoFragment extends AbstractFragment {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
             LayoutInflater inflater = getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dialog_sql_from_maple, null);
-            GenerateSQLSyntaxTask sqlSyntaxTask = new GenerateSQLSyntaxTask(dialogView);
-            sqlSyntaxTask.execute(sqlFromMaple);
             dialogBuilder.setPositiveButton("OK", (dialog, which) -> activeDialog.dismiss());
-            dialogBuilder.setTitle("SQL");
             dialogBuilder.setView(dialogView);
+            WebView convertedSQLWebView = dialogView.findViewById(R.id.wv_converted_sql);
+            convertedSQLWebView.getSettings().setJavaScriptEnabled(true);
+            convertedSQLWebView.loadUrl("file:///android_asset/editorhtml/readonly_editor.html");
+            convertedSQLWebView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    convertedSQLWebView.evaluateJavascript("setValue(\"" + TextUtils.unEscapeString(sqlFromMaple) + "\");", null);
+                }
+            });
             activeDialog = dialogBuilder.show();
         });
-    }
-
-    static class GenerateSQLSyntaxTask extends AsyncTask<String, Void, String> {
-        WeakReference<View> inflatedView;
-
-        public GenerateSQLSyntaxTask(View inflatedView) {
-            this.inflatedView = new WeakReference<>(inflatedView);
-        }
-
-        @Override
-        protected String doInBackground(String... sql) {
-            if (sql[0] != null) {
-                PrettifyHighlighter highlighter = new PrettifyHighlighter();
-                return highlighter.highlight("sql", sql[0]);
-            }
-            return "";
-        }
-
-        @Override
-        protected void onPostExecute(String highlightedString) {
-            ((TextView) inflatedView.get().findViewById(R.id.tv_sql_maple)).setText(Html.fromHtml(highlightedString));
-        }
     }
 }
