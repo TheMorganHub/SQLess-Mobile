@@ -25,6 +25,7 @@ import com.sqless.sqlessmobile.network.GoogleTokenManager;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewDBConnectionAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
+import com.sqless.sqlessmobile.utils.SQLUtils;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Conexiones");
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         lvConnections.setAdapter(adapter);
         lvConnections.setOnItemLongClickListener(this);
         lvConnections.setOnItemClickListener(this);
+        showOrHideImageBackground();
     }
 
     @Override
@@ -76,18 +79,31 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         EditText txtConPassword = viewInflated.findViewById(R.id.txt_con_password);
         Spinner dbSpinner = viewInflated.findViewById(R.id.spinner_dbs);
         if (update) {
+            dbSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    String selectedDB = dbSpinner.getAdapter().getItem(position).toString();
+                    savedConnectionData.setTestingDatabase(selectedDB);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
             txtConHost.setText(savedConnectionData.host);
             txtConPort.setText(savedConnectionData.port);
             txtConUsername.setText(savedConnectionData.username);
             txtConPassword.setText(savedConnectionData.password);
             dbSpinner.setVisibility(View.VISIBLE);
             dbSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new String[]{savedConnectionData.database}));
+            populateDbSpinner(savedConnectionData, viewInflated);
         }
 
         dialogBuilder
                 .setNeutralButton("Test", null)
                 .setPositiveButton("Guardar", null);
-        dialogBuilder.setTitle(update ? "Editar conexión" : "Nueva conexión");
+        dialogBuilder.setTitle(update ? "Editar conexión MySQL" : "Nueva conexión MySQL");
         dialogBuilder.setView(viewInflated);
         activeDialog = dialogBuilder.show();
 
@@ -102,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 activeDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
                 Toast.makeText(this, "La prueba de conexión fue exitosa", Toast.LENGTH_SHORT).show();
                 if (update) {
-                    UIUtils.selectSpinnerItemByValue(dbSpinner, savedConnectionData.database);
+                    String testingDb = savedConnectionData.testingDatabase;
+                    UIUtils.selectSpinnerItemByValue(dbSpinner, testingDb != null ? testingDb : savedConnectionData.database);
                 }
             }, errorCode -> {
                 positiveButtonGuardar.setEnabled(false);
@@ -112,16 +129,29 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
         positiveButtonGuardar.setOnClickListener(v -> {
             SQLConnectionManager.ConnectionData lastSuccessful = SQLConnectionManager.getInstance().getLastSuccessful();
-            lastSuccessful.setDatabase(dbSpinner.getSelectedItem().toString());
             activeDialog.dismiss();
-            if (update) {
-                lastSuccessful.setId(savedConnectionData.getId());
-                updateConnection(lastSuccessful);
-            } else {
-                saveConnection(lastSuccessful);
+            if (lastSuccessful != null) {
+                if (update) {
+                    lastSuccessful.setDatabase(savedConnectionData.testingDatabase);
+                    savedConnectionData.testingDatabase = null;
+                    lastSuccessful.setId(savedConnectionData.getId());
+                    updateConnection(lastSuccessful);
+                } else {
+                    lastSuccessful.setDatabase(dbSpinner.getSelectedItem().toString());
+                    saveConnection(lastSuccessful);
+                }
             }
         });
-        positiveButtonGuardar.setEnabled(false);
+        positiveButtonGuardar.setEnabled(update);
+    }
+
+    public void populateDbSpinner(SQLConnectionManager.ConnectionData savedConnectionData, View dialogView) {
+        SQLUtils.getDatabaseNames(this, savedConnectionData, names -> {
+            Spinner spinnerDB = dialogView.findViewById(R.id.spinner_dbs);
+            spinnerDB.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names));
+            UIUtils.selectSpinnerItemByValue(spinnerDB, savedConnectionData.database);
+            SQLConnectionManager.getInstance().setLastSuccessful(savedConnectionData);
+        });
     }
 
     public void updateConnection(SQLConnectionManager.ConnectionData connectionData) {
@@ -148,6 +178,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             Log.e("ERR", "INSERT");
         }
+        showOrHideImageBackground();
+    }
+
+    public void showOrHideImageBackground() {
+        boolean shouldDisplay = adapter.getCount() == 0;
+        findViewById(R.id.image_landing_background).setVisibility(shouldDisplay ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.tv_landing_hint).setVisibility(shouldDisplay ? View.VISIBLE : View.INVISIBLE);
+        findViewById(R.id.tv_landing_hint_bold).setVisibility(shouldDisplay ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void deleteConnection(SQLConnectionManager.ConnectionData connectionData) {
@@ -158,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         } else {
             Log.e("ERR", "DELETE");
         }
+        showOrHideImageBackground();
     }
 
     @Override

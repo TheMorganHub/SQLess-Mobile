@@ -6,15 +6,18 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.sqless.sqlessmobile.ui.activities.MainActivity"
+    tools:layout_editor_absoluteY="73dp"
     tools:showIn="@layout/activity_main">
 
     <TextView
         android:id="@+id/tv_landing_hint_bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="35dp"
         android:text="Haz click en el botón + para crear una nueva."
         android:textStyle="bold"
         android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/image_landing_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_landing_hint" />
@@ -23,23 +26,25 @@
         android:id="@+id/tv_landing_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="45dp"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="32dp"
         android:gravity="center"
         android:text="Aún no hay ninguna conexión MySQL aquí."
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/tv_landing_hint_bold"
+        app:layout_constraintStart_toStartOf="@+id/tv_landing_hint_bold"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/image_landing_background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="173dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="32dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_landing_hint_bold"
         app:srcCompat="@drawable/landing_db_connections" />
 
     <ListView

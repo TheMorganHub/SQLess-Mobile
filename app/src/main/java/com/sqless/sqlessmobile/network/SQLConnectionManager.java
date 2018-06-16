@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.ui.adapters.listview.Subtitulado;
@@ -58,8 +57,8 @@ public class SQLConnectionManager {
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, names);
                     ((Spinner) v.findViewById(R.id.spinner_dbs)).setAdapter(adapter);
                     v.findViewById(R.id.spinner_dbs).setVisibility(View.VISIBLE);
+                    v.post(() -> callbackSuccess.exec(lastSuccessful));
                 });
-                v.post(() -> callbackSuccess.exec(lastSuccessful));
             } catch (SQLException | BufferUnderflowException e) {
                 String exMessage = e.getMessage() != null ? e.getMessage() : "Ocurrió un error inesperado al testear la conexión. ¿Quizá la cuenta no existe?";
                 Log.e("SQLConnectionManager", "Test failed: " + exMessage);
@@ -81,6 +80,10 @@ public class SQLConnectionManager {
         return lastSuccessful;
     }
 
+    public void setLastSuccessful(ConnectionData lastSuccessful) {
+        this.lastSuccessful = lastSuccessful;
+    }
+
     public static SQLConnectionManager getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new SQLConnectionManager();
@@ -94,6 +97,7 @@ public class SQLConnectionManager {
         public String host;
         public String port;
         public String database;
+        public String testingDatabase;
         public String username;
         public String password;
 
@@ -113,6 +117,10 @@ public class SQLConnectionManager {
             this.database = database;
             this.username = username;
             this.password = password;
+        }
+
+        public void setTestingDatabase(String testingDatabase) {
+            this.testingDatabase = testingDatabase;
         }
 
         public void setDatabase(String database) {
