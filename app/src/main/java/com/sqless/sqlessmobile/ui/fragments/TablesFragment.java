@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -15,7 +14,6 @@ import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.activities.CreateTableActivity;
 import com.sqless.sqlessmobile.ui.activities.TableDetailsActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
-import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
 import com.sqless.sqlessmobile.utils.UIUtils;
 
@@ -94,20 +92,20 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     }
 
     public void deleteTable(SQLTable table) {
-        SQLUtils.dropEntity(getActivity(), connectionData, table, () -> {
-            tables.remove(table);
-            tablesAdapter.notifyDataSetChanged();
-            fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
-        }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar tabla"));
+        UIUtils.showConfirmationDialog(getActivity(), "Eliminar tabla", "¿Estás seguro que deseas eliminar la tabla " + table.getName() + "?",
+                () -> SQLUtils.dropEntity(getActivity(), connectionData, table, () -> {
+                    tables.remove(table);
+                    tablesAdapter.notifyDataSetChanged();
+                    fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
+                }, err -> UIUtils.showMessageDialog(getActivity(), "Eliminar tabla", "No se pudo eliminar la tabla.\nEl servidor respondió:\n" + err)));
     }
 
     public void renameTable(SQLTable table) {
-        UIUtils.showInputDialog(getActivity(), "Renombrar " + table.getName(), nombre -> {
-            SQLUtils.renameEntity(getActivity(), connectionData, nombre, table, () -> {
-                table.setName(nombre);
-                tablesAdapter.notifyDataSetChanged();
-            }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + table.getName(), "Hubo un error al renombrar entidad: " + err));
-        });
+        UIUtils.showInputDialog(getActivity(), "Renombrar " + table.getName(),
+                nombre -> SQLUtils.renameEntity(getActivity(), connectionData, nombre, table, () -> {
+                    table.setName(nombre);
+                    tablesAdapter.notifyDataSetChanged();
+                }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + table.getName(), "Hubo un error al renombrar entidad: " + err)));
     }
 
     @Override
@@ -142,13 +140,13 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
         AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
-        actionDialog.setItems(new String[]{"Eliminar", "Renombrar"}, (dialogInterface, clickedItem) -> {
+        actionDialog.setItems(new String[]{"Renombrar", "Eliminar"}, (dialogInterface, clickedItem) -> {
             switch (clickedItem) {
                 case 0:
-                    deleteTable(tables.get(i));
+                    renameTable(tables.get(i));
                     break;
                 case 1:
-                    renameTable(tables.get(i));
+                    deleteTable(tables.get(i));
                     break;
             }
         });

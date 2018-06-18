@@ -58,7 +58,7 @@ public class CreateColumnsFragment extends AbstractFragment implements AdapterVi
         String dataType = ((Spinner) dialogView.findViewById(R.id.sp_create_table_col_datatype)).getSelectedItem().toString();
         boolean isPk = ((Switch) dialogView.findViewById(R.id.switch_pk)).isChecked();
         boolean nullable = ((Switch) dialogView.findViewById(R.id.switch_nullable)).isChecked();
-        SQLColumn newColumn = new SQLColumn("", nombre, dataType, isPk, nullable);
+        SQLColumn newColumn = new SQLColumn(nombre, "", dataType, isPk, nullable);
         sqlColumns.add(newColumn);
         adapter.notifyDataSetChanged();
 

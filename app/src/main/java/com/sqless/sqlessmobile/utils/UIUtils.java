@@ -67,6 +67,15 @@ public class UIUtils {
         builder.show();
     }
 
+    public static void showConfirmationDialog(Activity context, String title, String msg, Runnable callbackYes) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.Theme_AppCompat_Light_Dialog_Alert);
+        builder.setTitle(title)
+                .setMessage(msg)
+                .setPositiveButton("Yes", (dialog, which) -> UIUtils.invokeOnUIThreadIfNotDestroyed(context, callbackYes))
+                .setNegativeButton("No", null)
+                .show();
+    }
+
     public static void showMessageDialog(Context context, String title, String msg) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.Theme_AppCompat_Light_Dialog_Alert);
         builder.setTitle(title)

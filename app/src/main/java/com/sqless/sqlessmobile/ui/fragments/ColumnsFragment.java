@@ -1,14 +1,19 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Switch;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
@@ -21,10 +26,13 @@ import com.sqless.sqlessmobile.ui.busevents.tabledata.DataEvents;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -64,7 +72,9 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
             progressBar.setVisibility(View.VISIBLE);
             switch (tableType) {
                 case TABLE:
-                    SQLUtils.getColumns(getActivity(), selectable, connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
+                    SQLUtils.getColumns(getActivity(), selectable, connectionData, this::onColumnsLoaded, err -> {
+                        progressBar.setVisibility(View.GONE);
+                    });
                     break;
                 case VIEW:
                     SQLUtils.getViewColumns(getActivity(), selectable, connectionData, this::onColumnsLoaded, err -> progressBar.setVisibility(View.GONE));
@@ -138,28 +148,88 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if (getArguments().getInt("table_type", -1) != VIEW) {
-            FinalValue<AlertDialog> dialog = new FinalValue<>();
-            AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
-            actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
-                switch (clickedItem) {
-                    case 0:
-                        deleteColumn(columns.get(position));
-                        break;
-                }
-            });
-            dialog.set(actionDialog.show());
-            return true;
+        if (getArguments().getInt("table_type", -1) == VIEW) {
+            return false;
         }
-        return false;
+        FinalValue<AlertDialog> dialog = new FinalValue<>();
+        AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
+        actionDialog.setItems(new String[]{"Editar", "Eliminar"}, (dialogInterface, clickedItem) -> {
+            switch (clickedItem) {
+                case 0:
+                    showEditColumnDialog(columns.get(position));
+                    break;
+                case 1:
+                    deleteColumn(columns.get(position));
+                    break;
+            }
+        });
+        dialog.set(actionDialog.show());
+        return true;
+    }
+
+    public void showEditColumnDialog(SQLColumn column) {
+        SQLColumn editedColumn = new SQLColumn(column);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_edit_column, fragmentView.findViewById(android.R.id.content), false);
+        builder.setPositiveButton("Confirmar", null);
+        builder.setNegativeButton("Cancelar", null);
+        builder.setView(viewInflated);
+        builder.setTitle("Editar columna");
+        EditText txtColName = viewInflated.findViewById(R.id.txt_edit_col_name);
+        Spinner spDataType = viewInflated.findViewById(R.id.sp_edit_column_datatype);
+        Switch switchNullable = viewInflated.findViewById(R.id.switch_nullable);
+        txtColName.setText(editedColumn.getName());
+        if (!SQLUtils.datatypeIsSupported(editedColumn.getDatatype())) {
+            List<String> datatypes = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.arr_create_table_datatypes)));
+            datatypes.add(editedColumn.getDatatype());
+            spDataType.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, datatypes));
+        }
+        switchNullable.setChecked(editedColumn.isNullable());
+        UIUtils.selectSpinnerItemByValue(spDataType, editedColumn.getDatatype());
+        spDataType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            boolean firstLoad = true;
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!firstLoad) {
+                    editedColumn.setDatatype(getActivity(), connectionData, spDataType.getItemAtPosition(position).toString());
+                }
+                firstLoad = false;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        activeDialog = builder.show();
+        activeDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String newName = txtColName.getText().toString();
+            boolean nullable = switchNullable.isChecked();
+            editedColumn.setUncommittedName(newName);
+            editedColumn.setNullable(nullable);
+            if (!editedColumn.getFirstTimeChangeStatement().equals(editedColumn.getChangeColumnStatement())) {
+                SQLUtils.updateColumn(getActivity(), connectionData, editedColumn, () -> {
+                    if (!editedColumn.getUncommittedName().equals(editedColumn.getName())) {
+                        editedColumn.setName(editedColumn.getUncommittedName());
+                    }
+                    columns.remove(column);
+                    columns.add(editedColumn);
+                    columnsAdapter.notifyDataSetChanged();
+                }, err -> UIUtils.showMessageDialog(getActivity(), "Editar columna", "No se pudo editar la columna.\nEl servidor respondió:\n" + err));
+            }
+            activeDialog.dismiss();
+        });
     }
 
     public void deleteColumn(SQLColumn column) {
-        SQLUtils.dropEntity(getActivity(), connectionData, column, () -> {
-            columns.remove(column);
-            columnsAdapter.notifyDataSetChanged();
-            fragmentView.findViewById(R.id.tv_no_columns_exist).setVisibility(columns != null && !columns.isEmpty() ? View.GONE : View.VISIBLE);
-        }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar columna"));
+        UIUtils.showConfirmationDialog(getActivity(), "Eliminar columna", "¿Estás seguro que deseas eliminar la columna " + column.getName() + "?",
+                () -> SQLUtils.dropEntity(getActivity(), connectionData, column, () -> {
+                    columns.remove(column);
+                    columnsAdapter.notifyDataSetChanged();
+                    fragmentView.findViewById(R.id.tv_no_columns_exist).setVisibility(columns != null && !columns.isEmpty() ? View.GONE : View.VISIBLE);
+                }, err -> UIUtils.showMessageDialog(getActivity(), "Eliminar columna", "No se pudo eliminar la columna.\nEl servidor respondió:\n" + err)));
     }
 
     @Override

@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SQLUtils {
+
+    public static boolean datatypeIsSupported(String datatype) {
+        return datatype.equals("int") || datatype.equals("varchar") || datatype.equals("datetime") || datatype.equals("decimal");
+    }
 
     /**
      * Filtra la palabra clave 'DELIMITER' y todos los delimitadores que no sean
@@ -203,7 +208,7 @@ public class SQLUtils {
                 while (rs.next()) {
                     String colName = rs.getString("COLUMN_NAME");
                     String dataType = rs.getString("DATA_TYPE");
-                    SQLColumn column = new SQLColumn(selectable.getName(), colName, dataType);
+                    SQLColumn column = new SQLColumn(colName, selectable.getName(), dataType);
                     columns.add(column);
                 }
                 UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> callbackSuccess.exec(columns));
@@ -219,18 +224,37 @@ public class SQLUtils {
 
     public static void getColumns(Activity context, SQLObject sqlTable, SQLConnectionManager.ConnectionData connectionData, Callback<List<SQLColumn>> callbackSuccess, Callback<String> callbackFailure) {
         SQLQuery columnsQuery = new SQLSelectQuery(context, connectionData,
-                "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = '" + connectionData.database
+                "SELECT * FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = '" + connectionData.database
                         + "' AND TABLE_NAME = '" + sqlTable.getName() + "'") {
             @Override
             public void onSuccess(ResultSet rs) throws SQLException {
                 List<SQLColumn> columns = new ArrayList<>();
                 while (rs.next()) {
-                    String colName = rs.getString("COLUMN_NAME");
+                    String columnName = rs.getString("COLUMN_NAME");
                     String dataType = rs.getString("DATA_TYPE");
-                    SQLColumn column = new SQLColumn(sqlTable.getName(), colName, dataType);
+                    SQLColumn column = new SQLColumn(columnName, sqlTable.getName(), dataType);
+                    column.setLength(rs.getString("CHARACTER_MAXIMUM_LENGTH"));
+                    column.setNumericPrecision(rs.getString("NUMERIC_PRECISION"));
+                    column.setNumericScale(rs.getString("NUMERIC_SCALE"));
+                    column.setNullable(rs.getString("IS_NULLABLE").equals("YES"));
                     column.setIsPK(rs.getString("COLUMN_KEY").equals("PRI"));
+                    column.setDefaultVal(rs.getString("COLUMN_DEFAULT"));
+                    column.setCharacterSet(rs.getString("CHARACTER_SET_NAME"));
+                    column.setCollation(rs.getString("COLLATION_NAME"));
+                    column.setUnsigned(rs.getString("COLUMN_TYPE").endsWith("unsigned"), false);
+                    column.setDateTimePrecision(DataTypeUtils.dataTypeIsTimeBased(dataType));
+                    column.setOnUpdateCurrentTimeStamp(rs.getString("EXTRA").equalsIgnoreCase("ON UPDATE CURRENT_TIMESTAMP"));
+                    column.setAutoincrement(rs.getString("EXTRA").equals("auto_increment"));
                     columns.add(column);
+                    if (column.getDatatype().equals("enum")) {
+                        String enumTypes = rs.getString("COLUMN_TYPE");
+                        column.setEnumLikeValues(enumTypes.substring(5, enumTypes.length() - 1));
+                    } else if (column.getDatatype().equals("set")) {
+                        String setTypes = rs.getString("COLUMN_TYPE");
+                        column.setEnumLikeValues(setTypes.substring(4, setTypes.length() - 1));
+                    }
                 }
+
 
                 SQLQuery fkQuery = new SQLSelectQuery(context, connectionData, "SELECT DISTINCT COLUMN_NAME\n" +
                         "FROM information_schema.TABLE_CONSTRAINTS i\n" +
@@ -262,6 +286,37 @@ public class SQLUtils {
             }
         };
         columnsQuery.exec();
+    }
+
+    public static void updateColumn(Activity context, SQLConnectionManager.ConnectionData connectionData, SQLColumn column, Runnable callbackSuccess, Callback<String> callbackFailure) {
+        SQLQuery updateColumn = new SQLUpdateQuery(context, connectionData, column.getChangeColumnStatement()) {
+            @Override
+            public void onSuccess(int updateCount) {
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, callbackSuccess);
+            }
+
+            @Override
+            public void onFailure(String errMessage) {
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> callbackFailure.exec(errMessage));
+            }
+        };
+        updateColumn.exec();
+    }
+
+    public static void getDbCollationAndCharSetName(Activity context, SQLConnectionManager.ConnectionData connectionData, Callback<Map<String, String>> callbackSuccess) {
+        Map<String, String> collationAndCharset = new HashMap<>();
+        SQLQuery tableCollationQuery = new SQLSelectQuery(context, connectionData, "SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME FROM information_schema.SCHEMATA\n"
+                + "WHERE schema_name = '" + connectionData.database + "'") {
+            @Override
+            public void onSuccess(ResultSet rs) throws SQLException {
+                if (rs.next()) {
+                    collationAndCharset.put("collation", rs.getString("DEFAULT_COLLATION_NAME"));
+                    collationAndCharset.put("charset", rs.getString("DEFAULT_CHARACTER_SET_NAME"));
+                }
+                callbackSuccess.exec(collationAndCharset);
+            }
+        };
+        tableCollationQuery.exec();
     }
 
     public static void getExecutables(Activity context, SQLConnectionManager.ConnectionData conData, Class<? extends SQLExecutable> className,

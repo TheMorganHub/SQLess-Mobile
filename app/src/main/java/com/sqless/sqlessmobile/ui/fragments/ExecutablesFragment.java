@@ -23,6 +23,7 @@ import com.sqless.sqlessmobile.ui.activities.QueryResultActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,10 +190,12 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
     }
 
     public void deleteExecutable(SQLExecutable executable) {
-        SQLUtils.dropEntity(getActivity(), connectionData, executable, () -> {
-            executables.remove(executable);
-            executablesAdapter.notifyDataSetChanged();
-            fragmentView.findViewById(R.id.tv_no_executables_exist).setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
-        }, err -> Log.e(getClass().getSimpleName(), "No se pudo eliminar el ejecutable"));
+        UIUtils.showConfirmationDialog(getActivity(), "Eliminar " + (executableType == FUNCTION ? "función" : "procedure"),
+                "¿Estás seguro que deseas eliminar " + executable.getName() + "?",
+                () -> SQLUtils.dropEntity(getActivity(), connectionData, executable, () -> {
+                    executables.remove(executable);
+                    executablesAdapter.notifyDataSetChanged();
+                    fragmentView.findViewById(R.id.tv_no_executables_exist).setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+                }, err -> Log.e(getClass().getSimpleName(), "No se pudo eliminar el ejecutable")));
     }
 }

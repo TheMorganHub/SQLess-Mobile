@@ -165,7 +165,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
             adapter.notifyDataSetChanged();
         } else {
-            Log.e("ERR", "UPDATE");
+            UIUtils.showMessageDialog(this, "Editar conexión conexión", "No se pudo editar la conexión. Intenta de nuevo más tarde. " +
+                    "Si el problema persiste, intenta reinstalando la aplicación.");
         }
     }
 
@@ -176,7 +177,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             connectionData.setId(id);
             adapter.notifyDataSetChanged();
         } else {
-            Log.e("ERR", "INSERT");
+            UIUtils.showMessageDialog(this, "Guardar conexión", "No se pudo guardar la conexión. Intenta de nuevo más tarde. " +
+                    "Si el problema persiste, intenta reinstalando la aplicación.");
         }
         showOrHideImageBackground();
     }
@@ -189,14 +191,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void deleteConnection(SQLConnectionManager.ConnectionData connectionData) {
-        boolean success = dbHelper.deleteConnection(connectionData);
-        if (success) {
-            connectionDataList.remove(connectionData);
-            adapter.notifyDataSetChanged();
-        } else {
-            Log.e("ERR", "DELETE");
-        }
-        showOrHideImageBackground();
+        UIUtils.showConfirmationDialog(this, "Eliminar conexión", "¿Estás seguro que deseas eliminar esta conexión?", () -> {
+            boolean success = dbHelper.deleteConnection(connectionData);
+            if (success) {
+                connectionDataList.remove(connectionData);
+                adapter.notifyDataSetChanged();
+            } else {
+                UIUtils.showMessageDialog(this, "Eliminar conexión", "No se pudo eliminar la conexión. Intenta de nuevo más tarde. " +
+                        "Si el problema persiste, intenta reinstalando la aplicación.");
+            }
+            showOrHideImageBackground();
+        });
     }
 
     @Override

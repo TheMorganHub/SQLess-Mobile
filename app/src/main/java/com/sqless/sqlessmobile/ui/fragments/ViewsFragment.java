@@ -4,7 +4,6 @@ package com.sqless.sqlessmobile.ui.fragments;
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -16,6 +15,7 @@ import com.sqless.sqlessmobile.ui.activities.TableDetailsActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.utils.FinalValue;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.List;
 
@@ -100,11 +100,12 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     }
 
     public void deleteView(SQLView view) {
-        SQLUtils.dropEntity(getActivity(), connectionData, view, () -> {
-            views.remove(view);
-            viewsAdapter.notifyDataSetChanged();
-            fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
-        }, err -> Log.e(getClass().getSimpleName(), "Hubo un error al eliminar vista"));
+        UIUtils.showConfirmationDialog(getActivity(), "Eliminar vista", "¿Estás seguro que deseas eliminar la vista " + view.getName() + "?",
+                () -> SQLUtils.dropEntity(getActivity(), connectionData, view, () -> {
+                    views.remove(view);
+                    viewsAdapter.notifyDataSetChanged();
+                    fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+                }, err -> UIUtils.showMessageDialog(getActivity(), "Eliminar vista", "No se pudo eliminar la vista.\nEl servidor respondió:\n" + err)));
     }
 
     @Override
