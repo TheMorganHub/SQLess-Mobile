@@ -1,6 +1,7 @@
 package com.sqless.sqlessmobile.ui.fragments;
 
 
+import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
@@ -53,11 +55,27 @@ public class CreateColumnsFragment extends AbstractFragment implements AdapterVi
         fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(sqlColumns.isEmpty() ? View.VISIBLE : View.INVISIBLE);
     }
 
+    public void createNewColumnDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.new_column_dialog, fragmentView.findViewById(android.R.id.content), false);
+        dialogBuilder.setPositiveButton("Crear", null);
+
+        dialogBuilder.setView(viewInflated);
+        dialogBuilder.setTitle("Nueva columna");
+        activeDialog = dialogBuilder.show();
+        activeDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> doCreateColummn(viewInflated));
+    }
+
     public void doCreateColummn(View dialogView) {
         String nombre = ((TextView) dialogView.findViewById(R.id.txt_create_table_col_name)).getText().toString();
         String dataType = ((Spinner) dialogView.findViewById(R.id.sp_create_table_col_datatype)).getSelectedItem().toString();
         boolean isPk = ((Switch) dialogView.findViewById(R.id.switch_pk)).isChecked();
         boolean nullable = ((Switch) dialogView.findViewById(R.id.switch_nullable)).isChecked();
+        if (nombre.isEmpty()) {
+            Toast.makeText(getActivity(), "El nombre de la columna no puede estar vacío.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         SQLColumn newColumn = new SQLColumn(nombre, "", dataType, isPk, nullable);
         sqlColumns.add(newColumn);
         adapter.notifyDataSetChanged();
@@ -70,30 +88,22 @@ public class CreateColumnsFragment extends AbstractFragment implements AdapterVi
         bus.post(new ColumnEvents.ColumnAddedEvent(newColumn));
     }
 
-    public void createNewColumnDialog() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
-        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.new_column_dialog, fragmentView.findViewById(android.R.id.content), false);
-        dialogBuilder.setPositiveButton("Crear", (dialog, which) -> doCreateColummn(viewInflated));
-
-        dialogBuilder.setView(viewInflated);
-        dialogBuilder.setTitle("Nueva columna");
-        activeDialog = dialogBuilder.show();
-    }
-
     private void deleteColumn(SQLColumn column) {
-        sqlColumns.remove(column);
-        adapter.notifyDataSetChanged();
-        bus.post(new ColumnEvents.ColumnRemovedEvent(column));
-        if (sqlColumns.isEmpty()) {
-            fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(View.VISIBLE);
-        }
+        UIUtils.showConfirmationDialog(getActivity(), "Eliminar columna", "¿Estás seguro que deseas eliminar la columna " + column.getName() + "?", () -> {
+            sqlColumns.remove(column);
+            adapter.notifyDataSetChanged();
+            bus.post(new ColumnEvents.ColumnRemovedEvent(column));
+            if (sqlColumns.isEmpty()) {
+                fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void renameColumn(SQLColumn column) {
         UIUtils.showInputDialog(getActivity(), "Renombrar " + column.getName(), newName -> {
             column.setName(newName);
             adapter.notifyDataSetChanged();
-        });
+        }, () -> Toast.makeText(getActivity(), "El nombre de la columna no puede estar vacío.", Toast.LENGTH_SHORT).show());
     }
 
     @Override

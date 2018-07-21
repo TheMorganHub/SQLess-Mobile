@@ -27,4 +27,8 @@
         <item>decimal</item>
     </string-array>
     <string name="title_activity_maple">Maple</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
 </resources>

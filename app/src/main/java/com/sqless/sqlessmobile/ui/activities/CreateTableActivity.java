@@ -1,13 +1,11 @@
 package com.sqless.sqlessmobile.ui.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,7 +14,6 @@ import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.queries.SQLQuery;
 import com.sqless.sqlessmobile.db.queries.SQLUpdateQuery;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
-import com.sqless.sqlessmobile.sqlobjects.SQLColumn;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.FragmentContainer;
 import com.sqless.sqlessmobile.ui.FragmentPagerCreateTableAdapter;
@@ -129,7 +126,11 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
     }
 
     public void confirmTableCreation() {
-        UIUtils.showInputDialog(this, "Nombre", nombre -> {
+        if (newTable.getColumns().isEmpty()) {
+            Toast.makeText(this, "La tabla debe tener al menos una columna para poder ser creada.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        UIUtils.showInputDialog(this, "Nombre de la tabla", nombre -> {
             newTable.setName(nombre);
             SQLQuery createTableQuery = new SQLUpdateQuery(this, connectionData, newTable.generateCreateStatement()) {
                 @Override
@@ -142,12 +143,14 @@ public class CreateTableActivity extends AppCompatActivity implements FragmentCo
 
                 @Override
                 public void onFailure(String errMessage) {
-                    Log.e("ERR", errMessage);
-                    UIUtils.invokeOnUIThreadIfNotDestroyed(CreateTableActivity.this, () -> Toast.makeText(CreateTableActivity.this, "Hubo un error al crear la tabla", Toast.LENGTH_SHORT).show());
+                    UIUtils.invokeOnUIThreadIfNotDestroyed(CreateTableActivity.this, () ->
+                            UIUtils.showMessageDialogWithNeutralButton(CreateTableActivity.this, "Error",
+                                    "La tabla no se pudo crear. Asegúrate que su nombre, la definición de las columnas y FKs son válidos.",
+                                    "Ver error SQL", () -> UIUtils.showMessageDialog(CreateTableActivity.this, "", errMessage)));
                 }
             };
             createTableQuery.exec();
-        });
+        }, () -> Toast.makeText(this, "El nombre de la tabla no puede estar vacío.", Toast.LENGTH_SHORT).show());
     }
 
     @Override

@@ -2,22 +2,31 @@ package com.sqless.sqlessmobile.ui.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.db.HelperDB;
@@ -30,7 +39,8 @@ import com.sqless.sqlessmobile.utils.UIUtils;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
     private AlertDialog activeDialog;
     private List<SQLConnectionManager.ConnectionData> connectionDataList;
@@ -50,6 +60,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> createConnectionDialog(null));
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
         ListView lvConnections = findViewById(R.id.lv_connections);
         adapter = new ListViewDBConnectionAdapter<>(this, connectionDataList);
 
@@ -59,6 +79,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         showOrHideImageBackground();
     }
 
+    public void loadUserInfoIntoDrawer(GoogleSignInAccount account) {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        ((TextView) headerView.findViewById(R.id.tv_username)).setText(account.getDisplayName());
+        ((TextView) headerView.findViewById(R.id.tv_user_email)).setText(account.getEmail());
+        Glide.with(this).load(account.getPhotoUrl()).override(170, 170).into((ImageView) headerView.findViewById(R.id.iv_user_photo));
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -66,7 +94,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void signInSilently() {
-        GoogleTokenManager.getInstance().silentSignIn(this, account -> Log.i("MainActivity", "Silent sign in with id token."));
+        GoogleTokenManager.getInstance().silentSignIn(this, account -> {
+            Log.i("MainActivity", "Silent sign in with id token.");
+            loadUserInfoIntoDrawer(account);
+        });
     }
 
     public void createConnectionDialog(SQLConnectionManager.ConnectionData savedConnectionData) {
@@ -251,5 +282,41 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             activeDialog.dismiss();
             activeDialog = null;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_logout) {
+            doLogOut();
+        } else if (id == R.id.nav_help) {
+            openMapleManual();
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    public void openMapleManual() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sqless.ddns.net/maple/docs"));
+        startActivity(browserIntent);
+    }
+
+    public void doLogOut() {
+        UIUtils.showConfirmationDialog(this, "Cerrar sesión", "¿Estás seguro que deseas cerrar sesión?",
+                () -> GoogleTokenManager.getInstance().logOut(this));
     }
 }

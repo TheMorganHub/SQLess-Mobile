@@ -37,4 +37,6 @@ dependencies {
     implementation group: 'org.greenrobot', name: 'eventbus', version: '3.0.0'
     implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.46'
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.8.3'
+    implementation group: 'com.github.bumptech.glide', name: 'glide', version: '3.7.0'
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
 }

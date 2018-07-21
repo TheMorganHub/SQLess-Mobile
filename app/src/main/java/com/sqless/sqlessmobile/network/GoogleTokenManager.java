@@ -2,6 +2,7 @@ package com.sqless.sqlessmobile.network;
 
 import android.app.Activity;
 import android.content.Intent;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -26,14 +27,24 @@ public class GoogleTokenManager {
                 .requestEmail()
                 .build();
         GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(context, gso);
-        mGoogleSignInClient.silentSignIn()
-                .addOnCompleteListener(context, task -> {
-                    if (task.isSuccessful()) {
-                        accountCallback.exec(task.getResult());
-                    } else {
-                        Intent intent = new Intent(context, SignInActivity.class);
-                        context.startActivityForResult(intent, ACC_SIGN_IN);
-                    }
-                });
+        mGoogleSignInClient.silentSignIn().addOnCompleteListener(context, task -> {
+            if (task.isSuccessful()) {
+                accountCallback.exec(task.getResult());
+            } else {
+                startSignInActivity(context);
+            }
+        });
+    }
+
+    public void logOut(Activity context) {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(context.getString(R.string.google_client_id))
+                .build();
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(context, gso);
+        mGoogleSignInClient.revokeAccess().addOnSuccessListener(aVoid -> startSignInActivity(context));
+    }
+
+    public void startSignInActivity(Activity context) {
+        Intent intent = new Intent(context, SignInActivity.class);
+        context.startActivityForResult(intent, ACC_SIGN_IN);
     }
 }

@@ -21,6 +21,7 @@ import com.sqless.sqlessmobile.sqlobjects.SQLTable;
 import com.sqless.sqlessmobile.ui.adapters.listview.ListViewImageAdapter;
 import com.sqless.sqlessmobile.ui.busevents.createtable.ColumnEvents;
 import com.sqless.sqlessmobile.utils.SQLUtils;
+import com.sqless.sqlessmobile.utils.UIUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -74,8 +75,12 @@ public class CreateUnionFragment extends AbstractFragment implements AdapterView
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
         View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.new_fk_dialog, fragmentView.findViewById(android.R.id.content), false);
         dialogBuilder.setPositiveButton("Crear", null);
+        dialogBuilder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
 
-        if (columns != null) {
+        if (columns == null || columns.isEmpty()) {
+            Toast.makeText(getActivity(), "Debe existir al menos una columna para crear una clave foránea.", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
             Spinner sp = viewInflated.findViewById(R.id.sp_fk_col_name);
             spinnerFkColumnAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, columns);
             sp.setAdapter(spinnerFkColumnAdapter);
@@ -150,12 +155,14 @@ public class CreateUnionFragment extends AbstractFragment implements AdapterView
     }
 
     public void deleteFk(SQLForeignKey fk) {
-        bus.post(new ColumnEvents.FKRemovedEvent(fk));
-        foreignKeys.remove(fk);
-        adapter.notifyDataSetChanged();
-        if (foreignKeys.isEmpty()) {
-            fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(View.VISIBLE);
-        }
+        UIUtils.showConfirmationDialog(getActivity(), "Eliminar clave foránea", "¿Estás seguro que deseas eliminar la clave foránea " + fk.getName() + "?", () -> {
+            bus.post(new ColumnEvents.FKRemovedEvent(fk));
+            foreignKeys.remove(fk);
+            adapter.notifyDataSetChanged();
+            if (foreignKeys.isEmpty()) {
+                fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override

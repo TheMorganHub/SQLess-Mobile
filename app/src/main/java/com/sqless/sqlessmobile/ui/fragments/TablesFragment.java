@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLTable;
@@ -101,11 +102,12 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
     }
 
     public void renameTable(SQLTable table) {
-        UIUtils.showInputDialog(getActivity(), "Renombrar " + table.getName(),
-                nombre -> SQLUtils.renameEntity(getActivity(), connectionData, nombre, table, () -> {
-                    table.setName(nombre);
-                    tablesAdapter.notifyDataSetChanged();
-                }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + table.getName(), "Hubo un error al renombrar entidad: " + err)));
+        UIUtils.showInputDialog(getActivity(), "Renombrar " + table.getName(), nombre -> {
+            SQLUtils.renameEntity(getActivity(), connectionData, nombre, table, () -> {
+                table.setName(nombre);
+                tablesAdapter.notifyDataSetChanged();
+            }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + table.getName(), "Hubo un error al renombrar entidad: " + err));
+        }, () -> Toast.makeText(getActivity(), "El nombre de la tabla no puede estar vacío.", Toast.LENGTH_SHORT).show());
     }
 
     @Override
