@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.sqlobjects.SQLView;
@@ -79,9 +80,12 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
         FinalValue<AlertDialog> dialog = new FinalValue<>();
         AlertDialog.Builder actionDialog = new AlertDialog.Builder(getContext());
-        actionDialog.setItems(new String[]{"Eliminar"}, (dialogInterface, clickedItem) -> {
+        actionDialog.setItems(new String[]{"Renombrar", "Eliminar"}, (dialogInterface, clickedItem) -> {
             switch (clickedItem) {
                 case 0:
+                    renameView(views.get(i));
+                    break;
+                case 1:
                     deleteView(views.get(i));
                     break;
             }
@@ -106,6 +110,15 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
                     viewsAdapter.notifyDataSetChanged();
                     fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
                 }, err -> UIUtils.showMessageDialog(getActivity(), "Eliminar vista", "No se pudo eliminar la vista.\nEl servidor respondió:\n" + err)));
+    }
+
+    public void renameView(SQLView view) {
+        UIUtils.showInputDialog(getActivity(), "Renombrar " + view.getName(), nombre -> {
+            SQLUtils.renameEntity(getActivity(), connectionData, nombre, view, () -> {
+                view.setName(nombre);
+                viewsAdapter.notifyDataSetChanged();
+            }, err -> UIUtils.showMessageDialog(getActivity(), "Renombrar " + view.getName(), "Hubo un error al renombrar entidad: " + err));
+        }, () -> Toast.makeText(getActivity(), "El nombre de la tabla no puede estar vacío.", Toast.LENGTH_SHORT).show());
     }
 
     @Override

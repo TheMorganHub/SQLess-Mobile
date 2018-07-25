@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.sqless.sqlessmobile.R;
 import com.sqless.sqlessmobile.network.SQLConnectionManager;
@@ -206,6 +207,11 @@ public class ColumnsFragment extends AbstractFragment implements AdapterView.OnI
         activeDialog = builder.show();
         activeDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
             String newName = txtColName.getText().toString();
+            if (newName.isEmpty()) {
+                Toast.makeText(getActivity(), "El nombre de la columna no puede estar vacío.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             boolean nullable = switchNullable.isChecked();
             editedColumn.setUncommittedName(newName);
             editedColumn.setNullable(nullable);
