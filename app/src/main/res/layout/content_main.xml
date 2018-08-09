@@ -6,41 +6,50 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.sqless.sqlessmobile.ui.activities.MainActivity"
+    tools:layout_editor_absoluteY="81dp"
     tools:showIn="@layout/activity_main">
 
     <TextView
         android:id="@+id/tv_landing_hint_bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Haz click en el botón + para crear una nueva."
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Pulsa el botón + para crear una nueva"
         android:textStyle="bold"
         android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/image_landing_background"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_landing_hint" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_landing_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="45dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:gravity="center"
-        android:text="Aún no hay ninguna conexión MySQL aquí."
+        android:text="Aún no hay ninguna conexión MySQL aquí"
         android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/tv_landing_hint_bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/image_landing_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/lv_connections"
+        app:layout_constraintEnd_toEndOf="@+id/lv_connections"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/landing_db_connections" />
+        app:layout_constraintTop_toTopOf="@+id/lv_connections"
+        app:srcCompat="@drawable/connection_no_exist_256" />
 
     <ListView
         android:id="@+id/lv_connections"

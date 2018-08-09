@@ -1,6 +1,8 @@
 package com.sqless.sqlessmobile.ui.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -8,7 +10,6 @@ import android.support.v4.provider.DocumentFile;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -97,7 +98,7 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_export_table, menu);
+        getMenuInflater().inflate(R.menu.menu_maple, menu);
         return true;
     }
 
@@ -108,11 +109,19 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.btn_maple_manual:
+                openMapleManual();
+                break;
             case R.id.btn_export_table:
                 exportQueryData();
                 return true;
         }
         return false;
+    }
+
+    public void openMapleManual() {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sqless.ddns.net/maple/docs"));
+        startActivity(browserIntent);
     }
 
     public void exportQueryData() {
@@ -127,6 +136,7 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
     public void showSelectResultsDialog() {
         bus.post(new RunMapleEvent.ResultRequestEvent());
         if (resultsHtml == null || resultsHtml.isEmpty()) {
+            UIUtils.showMessageDialog(this, "Exportar resultados", "Debe haber al menos un resultado disponible para hacer uso de esta funcionalidad.");
             return;
         }
         selectedResults = new ArrayList<>();
@@ -142,19 +152,20 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
                         if (isChecked) {
                             selectedResults.add(indexSelected);
                         } else if (selectedResults.contains(indexSelected)) {
-                            selectedResults.remove(indexSelected);
+                            selectedResults.remove((Integer) indexSelected);
                         }
                     })
-                    .setPositiveButton("Siguiente", (dialogInterface, id) -> {
-                        if (!selectedResults.isEmpty()) {
-                            showSelectFormatDialog();
-                        } else {
-                            Toast.makeText(this, "Se debe elegir al menos un resultado a exportar.", Toast.LENGTH_SHORT).show();
-                        }
-                    })
+                    .setPositiveButton("Siguiente", null)
                     .setNegativeButton("Cancelar", (dialogInterface, id) -> {
-                    }).create();
-            dialog.show();
+                    }).show();
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                if (!selectedResults.isEmpty()) {
+                    dialog.dismiss();
+                    showSelectFormatDialog();
+                } else {
+                    Toast.makeText(MapleActivity.this, "Se debe elegir al menos un resultado a exportar.", Toast.LENGTH_SHORT).show();
+                }
+            });
         } else { //si hay solo un resultado, vamos directamente al dialogo de elegir formato
             selectedResults.add(0);
             showSelectFormatDialog();

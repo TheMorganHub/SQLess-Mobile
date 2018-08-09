@@ -1,56 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.ExecutablesFragment"
+    tools:context="com.sqless.sqlessmobile.ui.fragments.TablesFragment"
     tools:layout_editor_absoluteY="81dp">
 
     <TextView
-        android:id="@+id/tv_no_executables_exist"
+        android:id="@+id/tv_no_tables_exist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="[Placeholder]"
+        android:layout_gravity="top|center"
+        android:text="Aún no hay tablas"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/tv_no_executables_exist_2"
+        app:layout_constraintBottom_toTopOf="@+id/tv_no_tables_exist_2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/tv_no_executables_exist_2"
+        android:id="@+id/tv_no_tables_exist_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Desliza para abajo para refrescar"
+        android:gravity="center"
+        android:text="Desliza para abajo para refrescar o pulsa el botón + para crear una nueva"
         android:textStyle="bold"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/iv_no_executables_exist"
+        app:layout_constraintBottom_toTopOf="@+id/iv_no_tables_exist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
-        android:id="@+id/iv_no_executables_exist"
+        android:id="@+id/iv_no_tables_exist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/function_procedure_no_exist_256"
+        android:src="@drawable/tables_no_exist_128"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/lay_swipe_refresh_executables" />
+        app:layout_constraintBottom_toBottomOf="@+id/lay_swipe_refresh_tables"
+        app:layout_constraintEnd_toEndOf="@+id/lay_swipe_refresh_tables"
+        app:layout_constraintStart_toStartOf="@+id/lay_swipe_refresh_tables"
+        app:layout_constraintTop_toTopOf="@+id/lay_swipe_refresh_tables" />
 
     <ProgressBar
-        android:id="@+id/progress_bar_executables"
+        android:id="@+id/progress_bar_tables"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,13 +58,24 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/lay_swipe_refresh_tables"
+        app:layout_constraintEnd_toEndOf="@+id/lay_swipe_refresh_tables"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/lay_swipe_refresh_tables" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_create_table"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/lay_swipe_refresh_executables" />
+        app:srcCompat="@drawable/ic_add_white_24dp" />
 
     <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/lay_swipe_refresh_executables"
+        android:id="@+id/lay_swipe_refresh_tables"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -75,9 +84,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ListView
-            android:id="@+id/lv_executables"
+            android:id="@+id/lv_tables"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
 </android.support.constraint.ConstraintLayout>

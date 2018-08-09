@@ -51,7 +51,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
             SQLUtils.getViews(getActivity(), connectionData, this::onViewsLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_views.setAdapter(viewsAdapter);
-            fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+            showOrHideBackground();
         }
     }
 
@@ -60,15 +60,22 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
         viewsAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_view), views);
         lv_views.setAdapter(viewsAdapter);
         progressBar.setVisibility(View.GONE);
-        fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+        showOrHideBackground();
     }
 
     public void onViewsRefresh(List<SQLView> views) {
         this.views = views;
         viewsAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_view), views);
         lv_views.setAdapter(viewsAdapter);
-        fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+        showOrHideBackground();
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    public void showOrHideBackground() {
+        int value = views != null && !views.isEmpty() ? View.GONE : View.VISIBLE;
+        fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(value);
+        fragmentView.findViewById(R.id.tv_no_views_exist_2).setVisibility(value);
+        fragmentView.findViewById(R.id.iv_no_views_exist).setVisibility(value);
     }
 
     @Override
@@ -108,7 +115,7 @@ public class ViewsFragment extends AbstractFragment implements AdapterView.OnIte
                 () -> SQLUtils.dropEntity(getActivity(), connectionData, view, () -> {
                     views.remove(view);
                     viewsAdapter.notifyDataSetChanged();
-                    fragmentView.findViewById(R.id.tv_no_views_exist).setVisibility(views != null && !views.isEmpty() ? View.GONE : View.VISIBLE);
+                    showOrHideBackground();
                 }, err -> UIUtils.showMessageDialog(getActivity(), "Eliminar vista", "No se pudo eliminar la vista.\nEl servidor respondió:\n" + err)));
     }
 

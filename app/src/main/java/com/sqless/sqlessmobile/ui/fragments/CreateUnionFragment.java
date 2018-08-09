@@ -66,7 +66,14 @@ public class CreateUnionFragment extends AbstractFragment implements AdapterView
             bus.register(this);
         }
         lvUnions.setAdapter(adapter);
-        fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(foreignKeys.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+        showOrHideBackground();
+    }
+
+    public void showOrHideBackground() {
+        int visibility = foreignKeys.isEmpty() ? View.VISIBLE : View.INVISIBLE;
+        fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(visibility);
+        fragmentView.findViewById(R.id.tv_create_table_no_fks_2).setVisibility(visibility);
+        fragmentView.findViewById(R.id.iv_create_table_no_fks).setVisibility(visibility);
     }
 
     public void createNewFKDialog() {
@@ -140,9 +147,7 @@ public class CreateUnionFragment extends AbstractFragment implements AdapterView
         foreignKeys.add(newFk);
         adapter.notifyDataSetChanged();
 
-        if (!foreignKeys.isEmpty()) {
-            fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(View.INVISIBLE);
-        }
+        showOrHideBackground();
 
         activeDialog.dismiss();
         bus.post(new ColumnEvents.FKAddedEvent(newFk));
@@ -159,9 +164,7 @@ public class CreateUnionFragment extends AbstractFragment implements AdapterView
             bus.post(new ColumnEvents.FKRemovedEvent(fk));
             foreignKeys.remove(fk);
             adapter.notifyDataSetChanged();
-            if (foreignKeys.isEmpty()) {
-                fragmentView.findViewById(R.id.tv_create_table_no_fks).setVisibility(View.VISIBLE);
-            }
+            showOrHideBackground();
         });
     }
 

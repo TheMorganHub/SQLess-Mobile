@@ -2,10 +2,10 @@ package com.sqless.sqlessmobile.ui.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == GoogleTokenManager.ACC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 GoogleSignInAccount account = data.getParcelableExtra("ACCOUNT");
-                Toast.makeText(this, "Bienvenido " + account.getEmail(), Toast.LENGTH_SHORT).show();
+                Snackbar.make(findViewById(android.R.id.content), "Bienvenido " + account.getDisplayName() + " (" + account.getEmail() + ")", Snackbar.LENGTH_SHORT).show();
             } else {
                 finish();
             }
@@ -299,10 +299,13 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_logout) {
-            doLogOut();
-        } else if (id == R.id.nav_help) {
-            openMapleManual();
+        switch (id) {
+            case R.id.nav_logout:
+                doLogOut();
+                break;
+            case R.id.nav_about:
+                showAbout();
+                break;
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -310,13 +313,17 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void openMapleManual() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sqless.ddns.net/maple/docs"));
-        startActivity(browserIntent);
-    }
-
     public void doLogOut() {
         UIUtils.showConfirmationDialog(this, "Cerrar sesión", "¿Estás seguro que deseas cerrar sesión?",
                 () -> GoogleTokenManager.getInstance().logOut(this));
+    }
+
+    public void showAbout() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_about, null);
+        dialogBuilder.setView(dialogView);
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 }

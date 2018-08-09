@@ -62,7 +62,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
         lvExecutables = fragmentView.findViewById(R.id.lv_executables);
         progressBar = fragmentView.findViewById(R.id.progress_bar_executables);
         tvNoExecutables = fragmentView.findViewById(R.id.tv_no_executables_exist);
-        tvNoExecutables.setText("No hay " + (executableType == FUNCTION ? "funciones" : "procedures"));
+        tvNoExecutables.setText("Aún no hay " + (executableType == FUNCTION ? "funciones" : "procedures"));
 
         if (executablesAdapter == null) {
             progressBar.setVisibility(View.VISIBLE);
@@ -76,7 +76,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
             }
         } else {
             lvExecutables.setAdapter(executablesAdapter);
-            tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+            showOrHideBackground();
         }
     }
 
@@ -98,7 +98,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
                 getResources().getDrawable(executableType == FUNCTION ? R.drawable.ic_functions_black_24dp : R.drawable.ic_procedures_black_24dp), executables);
         lvExecutables.setAdapter(executablesAdapter);
         progressBar.setVisibility(View.GONE);
-        tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+        showOrHideBackground();
     }
 
     public void onExecutablesRefresh(List<SQLExecutable> executables) {
@@ -106,7 +106,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
         executablesAdapter = new ListViewImageAdapter<>(getContext(),
                 getResources().getDrawable(executableType == FUNCTION ? R.drawable.ic_functions_black_24dp : R.drawable.ic_procedures_black_24dp), executables);
         lvExecutables.setAdapter(executablesAdapter);
-        tvNoExecutables.setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+        showOrHideBackground();
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -174,6 +174,13 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
         startActivity(intent);
     }
 
+    public void showOrHideBackground() {
+        int value = executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE;
+        fragmentView.findViewById(R.id.tv_no_executables_exist).setVisibility(value);
+        fragmentView.findViewById(R.id.tv_no_executables_exist_2).setVisibility(value);
+        fragmentView.findViewById(R.id.iv_no_executables_exist).setVisibility(value);
+    }
+
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         FinalValue<AlertDialog> dialog = new FinalValue<>();
@@ -195,7 +202,7 @@ public class ExecutablesFragment extends AbstractFragment implements AdapterView
                 () -> SQLUtils.dropEntity(getActivity(), connectionData, executable, () -> {
                     executables.remove(executable);
                     executablesAdapter.notifyDataSetChanged();
-                    fragmentView.findViewById(R.id.tv_no_executables_exist).setVisibility(executables != null && !executables.isEmpty() ? View.GONE : View.VISIBLE);
+                    showOrHideBackground();
                 }, err -> Log.e(getClass().getSimpleName(), "No se pudo eliminar el ejecutable")));
     }
 }

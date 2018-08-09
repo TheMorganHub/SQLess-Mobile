@@ -102,8 +102,10 @@ public class MapleCrearFragment extends AbstractFragment {
 
             @Override
             public void onFailure(String message) {
-                bus.post(new RunMapleEvent.MapleExceptionEvent(message));
-                bus.post(new MapleExecutionReadyEvent());
+                UIUtils.invokeOnUIThreadIfNotDestroyed(getActivity(), () -> {
+                    bus.post(new RunMapleEvent.MapleExceptionEvent(message));
+                    bus.post(new MapleExecutionReadyEvent());
+                });
             }
 
             @Override

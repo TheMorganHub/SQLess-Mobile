@@ -52,7 +52,14 @@ public class CreateColumnsFragment extends AbstractFragment implements AdapterVi
             adapter = new ListViewColumnDetailsAdapter(getContext(), sqlColumns);
         }
         lvCreateTableColumns.setAdapter(adapter);
-        fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(sqlColumns.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+        showOrHideBackground();
+    }
+
+    public void showOrHideBackground() {
+        int visibility = sqlColumns.isEmpty() ? View.VISIBLE : View.INVISIBLE;
+        fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(visibility);
+        fragmentView.findViewById(R.id.tv_create_table_no_columns_exist_2).setVisibility(visibility);
+        fragmentView.findViewById(R.id.iv_no_columns_exist).setVisibility(visibility);
     }
 
     public void createNewColumnDialog() {
@@ -80,9 +87,7 @@ public class CreateColumnsFragment extends AbstractFragment implements AdapterVi
         sqlColumns.add(newColumn);
         adapter.notifyDataSetChanged();
 
-        if (!sqlColumns.isEmpty()) {
-            fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(View.INVISIBLE);
-        }
+        showOrHideBackground();
 
         activeDialog.dismiss();
         bus.post(new ColumnEvents.ColumnAddedEvent(newColumn));
@@ -93,9 +98,7 @@ public class CreateColumnsFragment extends AbstractFragment implements AdapterVi
             sqlColumns.remove(column);
             adapter.notifyDataSetChanged();
             bus.post(new ColumnEvents.ColumnRemovedEvent(column));
-            if (sqlColumns.isEmpty()) {
-                fragmentView.findViewById(R.id.tv_create_table_no_columns).setVisibility(View.VISIBLE);
-            }
+            showOrHideBackground();
         });
     }
 

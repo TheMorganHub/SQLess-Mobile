@@ -14,11 +14,12 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/fk_no_exist_256"
+        android:src="@drawable/fk_no_exist_128"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/lv_unions"
         app:layout_constraintStart_toStartOf="@+id/lv_unions"
-        app:layout_constraintTop_toTopOf="@+id/lv_unions" />
+        app:layout_constraintTop_toTopOf="@+id/lv_unions"
+        app:layout_constraintVertical_bias="0.63" />
 
     <TextView
         android:id="@+id/tv_create_table_no_fks_2"

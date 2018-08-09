@@ -51,6 +51,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
             SQLUtils.getTables(getActivity(), connectionData, this::onTablesLoaded, err -> progressBar.setVisibility(View.GONE));
         } else { //ya existe una instancia del fragment
             lv_tables.setAdapter(tablesAdapter);
+            showOrHideBackground();
         }
     }
 
@@ -65,7 +66,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         lv_tables.setAdapter(tablesAdapter);
 
         swipeRefreshLayout.setRefreshing(false);
-        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
+        showOrHideBackground();
     }
 
     public void onTablesLoaded(List<SQLTable> tables) {
@@ -73,7 +74,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         tablesAdapter = new ListViewImageAdapter<>(getContext(), getResources().getDrawable(R.drawable.ic_table_black_24dp), tables);
         lv_tables.setAdapter(tablesAdapter);
         progressBar.setVisibility(View.GONE);
-        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
+        showOrHideBackground();
     }
 
     @Override
@@ -84,6 +85,13 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
         lv_tables = containerView.findViewById(R.id.lv_tables);
         lv_tables.setOnItemClickListener(this);
         lv_tables.setOnItemLongClickListener(this);
+    }
+
+    public void showOrHideBackground() {
+        int value = tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE;
+        fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(value);
+        fragmentView.findViewById(R.id.tv_no_tables_exist_2).setVisibility(value);
+        fragmentView.findViewById(R.id.iv_no_tables_exist).setVisibility(value);
     }
 
     public void actionCreateTable() {
@@ -97,7 +105,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
                 () -> SQLUtils.dropEntity(getActivity(), connectionData, table, () -> {
                     tables.remove(table);
                     tablesAdapter.notifyDataSetChanged();
-                    fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
+                    showOrHideBackground();
                 }, err -> UIUtils.showMessageDialog(getActivity(), "Eliminar tabla", "No se pudo eliminar la tabla.\nEl servidor respondió:\n" + err)));
     }
 
@@ -118,7 +126,7 @@ public class TablesFragment extends AbstractFragment implements AdapterView.OnIt
                     SQLTable newTable = (SQLTable) data.getSerializableExtra("new_table");
                     tables.add(newTable);
                     tablesAdapter.notifyDataSetChanged();
-                    fragmentView.findViewById(R.id.tv_no_tables_exist).setVisibility(tables != null && !tables.isEmpty() ? View.GONE : View.VISIBLE);
+                    showOrHideBackground();
                 }
                 break;
         }

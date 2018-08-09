@@ -27,7 +27,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/column_no_exist_256"
+        android:src="@drawable/column_no_exist_128"
         app:layout_constraintBottom_toBottomOf="@+id/lv_create_table_columns"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/lv_create_table_columns"

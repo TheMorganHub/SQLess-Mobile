@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#263238</color>
-    <color name="colorPrimaryDark">#212121</color>
-    <color name="colorAccent">#546e7a</color>
+    <color name="colorPrimary">#0f3e56</color>
+    <color name="colorPrimaryDark">#071e29</color>
+    <color name="colorAccent">#196284</color>
     <color name="seleccionListView">#eeeeee</color>
 </resources>

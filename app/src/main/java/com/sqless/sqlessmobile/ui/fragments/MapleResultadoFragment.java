@@ -93,7 +93,7 @@ public class MapleResultadoFragment extends AbstractFragment {
     public void prepareUIForError(String errorMessage, boolean mapleError) {
         htmlResults = null;
         this.mapleError = mapleError;
-        this.sqlExceptionFromMaple = errorMessage;
+        this.sqlExceptionFromMaple = errorMessage.equals("connect timed out") ? "El servidor de Maple no se encuentra disponible.\nIntenta más tarde." : errorMessage;
         TextView tvMapleErrors = fragmentView.findViewById(R.id.tv_maple_errors);
         tvMapleErrors.setText(sqlExceptionFromMaple);
         tvMapleErrors.setVisibility(View.VISIBLE);

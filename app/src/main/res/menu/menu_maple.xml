@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/btn_maple_manual"
+        android:icon="@drawable/ic_help_white_24dp"
+        android:title="Exportar datos..."
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/btn_export_table"
+        android:icon="@drawable/ic_table_export_24dp"
+        android:title="Manual de usuario de Maple"
+        app:showAsAction="always" />
+</menu>
