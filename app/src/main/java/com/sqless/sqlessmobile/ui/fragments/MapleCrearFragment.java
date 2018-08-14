@@ -95,7 +95,7 @@ public class MapleCrearFragment extends AbstractFragment {
                     onFailure(json.getString("err"));
                     return;
                 }
-                String sql = json.getString("CONVERTED_SQL");
+                String sql = json.getString("sql_from_maple");
                 RunMapleQuery mapleTask = new RunMapleQuery(MapleCrearFragment.this);
                 mapleTask.execute(sql);
             }

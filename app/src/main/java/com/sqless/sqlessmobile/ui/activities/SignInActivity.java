@@ -77,8 +77,6 @@ public class SignInActivity extends Activity implements View.OnClickListener {
             RestRequest request = new PostRequest(getString(R.string.auth_url), Resty.data("id_token", account.getIdToken())) {
                 @Override
                 public void onSuccess(JSONObject json) throws Exception {
-                    //si la autenticación con el backend fue exitosa, el json va a contener token_info. Si no fue exitosa, esto va a tirar una exception e ir a onFailure()
-                    json.get("token_info");
                     setResult(RESULT_OK, getIntent().putExtra("ACCOUNT", account));
                     finish();
                 }
