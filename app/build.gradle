@@ -32,7 +32,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.google.android.gms:play-services-auth:15.0.1'
+    implementation 'com.google.android.gms:play-services-auth:16.0.1'
     implementation group: 'us.monoid.web', name: 'resty', version: '0.3.2'
     implementation group: 'org.greenrobot', name: 'eventbus', version: '3.0.0'
     implementation group: 'mysql', name: 'mysql-connector-java', version: '5.1.46'

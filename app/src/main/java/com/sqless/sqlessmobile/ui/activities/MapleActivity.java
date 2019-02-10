@@ -120,7 +120,7 @@ public class MapleActivity extends AppCompatActivity implements FragmentContaine
     }
 
     public void openMapleManual() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sqless.ddns.net/maple/docs"));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sqless.000webhostapp.com/maple/docs"));
         startActivity(browserIntent);
     }
 
