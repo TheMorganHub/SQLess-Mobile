@@ -3,16 +3,20 @@ package com.sqless.sqlessmobile.ui.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -147,7 +151,9 @@ public class MainActivity extends AppCompatActivity
             String password = txtConPassword.getText().toString();
             SQLConnectionManager.getInstance().testConnection(viewInflated, username, password, host, port, connectionData -> {
                 activeDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
-                Toast.makeText(this, "La prueba de conexión fue exitosa", Toast.LENGTH_SHORT).show();
+                Toast toast = Toast.makeText(this, "La prueba de conexión fue exitosa", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 0);
+                toast.show();
                 if (update) {
                     String testingDb = savedConnectionData.testingDatabase;
                     UIUtils.selectSpinnerItemByValue(dbSpinner, testingDb != null ? testingDb : savedConnectionData.database);
@@ -155,7 +161,9 @@ public class MainActivity extends AppCompatActivity
             }, errorCode -> {
                 positiveButtonGuardar.setEnabled(false);
                 viewInflated.findViewById(R.id.spinner_dbs).setVisibility(View.INVISIBLE);
-                Toast.makeText(this, "La prueba de conexión falló", Toast.LENGTH_SHORT).show();
+                Toast toast = Toast.makeText(this, "La prueba de conexión falló.\nVerifica tus datos de conexión.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP, 0, 0);
+                toast.show();
             });
         });
         positiveButtonGuardar.setOnClickListener(v -> {
