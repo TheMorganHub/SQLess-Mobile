@@ -2,7 +2,7 @@ package com.sqless.sqlessmobile.utils;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.support.v4.provider.DocumentFile;
+import androidx.documentfile.provider.DocumentFile;
 import android.util.Log;
 import android.widget.Toast;
 

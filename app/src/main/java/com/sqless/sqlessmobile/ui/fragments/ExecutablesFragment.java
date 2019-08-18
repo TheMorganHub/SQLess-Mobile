@@ -2,9 +2,9 @@ package com.sqless.sqlessmobile.ui.fragments;
 
 
 import android.content.Intent;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;

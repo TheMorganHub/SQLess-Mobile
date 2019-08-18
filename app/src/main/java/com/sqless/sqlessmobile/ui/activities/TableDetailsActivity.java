@@ -1,12 +1,12 @@
 package com.sqless.sqlessmobile.ui.activities;
 
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.provider.DocumentFile;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;

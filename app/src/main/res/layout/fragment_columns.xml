@@ -21,7 +21,7 @@
         android:layout_gravity="center"
         android:visibility="invisible" />
 
-    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/lay_swipe_refresh_columns"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -30,5 +30,5 @@
             android:id="@+id/lv_columnas"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>
