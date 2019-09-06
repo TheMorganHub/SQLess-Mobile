@@ -2,13 +2,18 @@ package com.sqless.sqlessmobile.network;
 
 import android.app.Activity;
 import android.content.Context;
+
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.sqless.sqlessmobile.R;
+import com.sqless.sqlessmobile.ui.activities.MainActivity;
 import com.sqless.sqlessmobile.ui.adapters.listview.Subtitulado;
 import com.sqless.sqlessmobile.utils.Callback;
 import com.sqless.sqlessmobile.utils.SQLUtils;
@@ -141,7 +146,15 @@ public class SQLConnectionManager {
                 DriverManager.setLoginTimeout(5);
                 conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?allowMultiQueries=true", username, password);
             } catch (SQLException e) {
-                UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> UIUtils.showMessageDialog(context, "Error de conexión", "La conexión con el servidor MySQL no se pudo crear.\n" + e.getMessage()));
+                UIUtils.invokeOnUIThreadIfNotDestroyed(context, () -> {
+                    Runnable leaveActivity = () -> {
+                        if (context.getClass() != MainActivity.class) {
+                            context.finish();
+                        }
+                    };
+                    UIUtils.showMessageDialog(context, "Error de conexión", "La conexión con el servidor MySQL no se pudo crear." +
+                            "\nVerifica que los datos de conexión sean correctos y que el servidor se encuentre disponible para aceptar conexiones.", leaveActivity, leaveActivity);
+                });
             }
             return conn;
         }

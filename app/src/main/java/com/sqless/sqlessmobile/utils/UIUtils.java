@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.appcompat.app.AlertDialog;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -17,7 +19,7 @@ import com.sqless.sqlessmobile.R;
 public class UIUtils {
 
     /**
-     * Ejecuta el {@link Runnable} dado en el Thread que se encarga de renderizar la UI.
+     * Ejecuta el callback dado en el Thread que se encarga de renderizar la UI.
      *
      * @param runnable el Runnable a ejecutar.
      */
@@ -108,11 +110,19 @@ public class UIUtils {
     }
 
     public static void showMessageDialog(Context context, String title, String msg, Runnable callbackOk) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title)
+        showMessageDialog(context, title, msg, callbackOk, null);
+    }
+
+    public static void showMessageDialog(Context context, String title, String msg, Runnable callbackOk, Runnable callbackDismiss) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setTitle(title)
                 .setMessage(msg)
-                .setPositiveButton("OK", (dialog, which) -> callbackOk.run())
-                .show();
+                .setPositiveButton("OK", (dialog, which) -> callbackOk.run());
+        AlertDialog alertDialog = builder.create();
+        if (callbackDismiss != null) {
+            alertDialog.setOnDismissListener(dialog -> callbackDismiss.run());
+        }
+        alertDialog.show();
     }
 
 }
